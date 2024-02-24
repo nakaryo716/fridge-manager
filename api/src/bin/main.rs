@@ -10,6 +10,10 @@ async fn main() {
 
     tracing::info!("Starting application");
 
+    // database_urlの設定
+
+    // database 接続
+
     // ルーティング
     let app = marge_route::app();
 
