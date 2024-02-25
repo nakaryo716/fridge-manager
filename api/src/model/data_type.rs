@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use sqlx::postgres::PgPool;
 
 use serde::{Deserialize, Serialize};
@@ -6,19 +5,17 @@ use serde::{Deserialize, Serialize};
 // データベースpool構造体
 #[derive(Debug, Clone)]
 pub struct ItemRepository {
-    pg_pool: Arc<PgPool>
+    pg_pool: PgPool,
 }
 
 impl ItemRepository {
     pub fn new(pg_pool: PgPool) -> Self {
-        Self {
-            pg_pool: Arc::new(pg_pool),
-        }
+        Self { pg_pool }
     }
 }
 
 // 賞味(消費)期限を定義する構造体
-#[derive(Debug,Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Date {
     pub year: u32,
     pub month: u32,
@@ -49,7 +46,6 @@ pub struct UpdateItem {
     pub yread: Option<u32>,
     pub month: Option<u32>,
     pub day: Option<u32>,
-
 }
 
 // ValidatedJsonのtrait実装

@@ -1,8 +1,13 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, response::{Html, IntoResponse}, Json};
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{Html, IntoResponse},
+    Json,
+};
 
-use crate::model::{app_logic::RepositoryForDb, data_type::{CreateItem, ItemRepository}};
+use crate::model::{app_logic::RepositoryForDb, data_type::CreateItem};
 
 pub async fn index() -> impl IntoResponse {
     tracing::info!("Called index handler");
@@ -10,12 +15,12 @@ pub async fn index() -> impl IntoResponse {
 }
 
 // postハンドラ
-pub async fn post_item(
+pub async fn post_item<T: RepositoryForDb>(
     Json(payload): Json<CreateItem>,
-    State(pool): State<Arc<ItemRepository>>,
+    State(repository): State<Arc<T>>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let response = pool.create(payload).await.unwrap();
-    
+    let response = repository.create(payload).await.unwrap();
+
     Ok((StatusCode::CREATED, Json(response)))
 }
 

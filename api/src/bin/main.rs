@@ -1,8 +1,10 @@
-use api::routers::marge_route;
+use api::{model::data_type::ItemRepository, routers::marge_route};
+use sqlx::postgres::PgPoolOptions;
+use std::error;
 use tracing::Level;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn error::Error>> {
     // ログの設定
     tracing_subscriber::fmt()
         .with_max_level(Level::TRACE)
@@ -11,11 +13,20 @@ async fn main() {
     tracing::info!("Starting application");
 
     // database_urlの設定
+    dotenvy::dotenv()?;
+    let db_connection_str = std::env::var("DATABASE_URL").expect("can't find database");
+    println!("{}", db_connection_str);
 
     // database 接続
+    let pool = PgPoolOptions::new()
+        .connect(&db_connection_str)
+        .await
+        .expect("can't connect to database");
+
+    let respository = ItemRepository::new(pool);
 
     // ルーティング
-    let app = marge_route::app();
+    let app = marge_route::app(respository);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
@@ -23,4 +34,6 @@ async fn main() {
     tracing::info!("Listening on {:?}", listener);
 
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }
