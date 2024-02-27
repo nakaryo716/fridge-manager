@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::State,
+    extract::{Path, State},
     http::StatusCode,
     response::{Html, IntoResponse},
     Json,
@@ -13,6 +13,8 @@ pub async fn index() -> impl IntoResponse {
     tracing::info!("Called index handler");
     Html("<h1>Test</h1>")
 }
+// .unwrap()はあとで修正
+// エラーハンドリングを行う(StatusCodeを返す)
 
 // postハンドラ
 pub async fn post_item<T: RepositoryForDb>(
@@ -25,8 +27,23 @@ pub async fn post_item<T: RepositoryForDb>(
 }
 
 // getハンドラ
+pub async fn get_item<T: RepositoryForDb>(
+    Path(id): Path<i32>,
+    State(repository): State<Arc<T>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let item = repository.read(id).await.unwrap();
+
+    Ok((StatusCode::OK, Json(item)))
+}
 
 // all-getハンドラ
+pub async fn get_all_item<T: RepositoryForDb>(
+    State(repository): State<Arc<T>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let item = repository.read_all().await.unwrap();
+
+    Ok((StatusCode::OK, Json(item)))
+}
 
 // findハンドラ
 

@@ -5,10 +5,10 @@ use async_trait::async_trait;
 #[async_trait]
 pub trait RepositoryForDb: std::marker::Send + std::marker::Sync + 'static {
     async fn create(&self, payload: CreateItem) -> Result<Item, RepositoryError>;
-    async fn read(&self) -> Result<Item, RepositoryError>;
+    async fn read(&self, id: i32) -> Result<Item, RepositoryError>;
     async fn read_all(&self) -> Result<Item, RepositoryError>;
-    async fn update(&self) -> Result<Item, RepositoryError>;
-    async fn delete(&self) -> Result<(), RepositoryError>;
+    async fn update(&self, id: i32) -> Result<Item, RepositoryError>;
+    async fn delete(&self, id: i32) -> Result<(), RepositoryError>;
 }
 
 // create function
@@ -30,16 +30,16 @@ impl RepositoryForDb for ItemRepository {
     async fn create(&self, payload: CreateItem) -> Result<Item, RepositoryError> {
         Ok((todo!()))
     }
-    async fn read(&self) -> Result<Item, RepositoryError> {
+    async fn read(&self, id: i32) -> Result<Item, RepositoryError> {
         Ok((todo!()))
     }
     async fn read_all(&self) -> Result<Item, RepositoryError> {
         Ok((todo!()))
     }
-    async fn update(&self) -> Result<Item, RepositoryError> {
+    async fn update(&self, id: i32) -> Result<Item, RepositoryError> {
         Ok((todo!()))
     }
-    async fn delete(&self) -> Result<(), RepositoryError> {
+    async fn delete(&self, id: i32) -> Result<(), RepositoryError> {
         Ok((todo!()))
     }
 }
