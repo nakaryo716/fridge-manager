@@ -16,13 +16,15 @@ impl ItemRepository {
 
 // 賞味(消費)期限を定義する構造体
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Date {
+pub struct ExpirationDate {
     pub year: u32,
     pub month: u32,
     pub day: u32,
 }
 
-impl Date {
+// もしかしていらないかも
+// databaseにinsertする際に使用(?)
+impl ExpirationDate {
     pub fn new(year: u32, month: u32, day: u32) -> Self {
         Self {
             year,
@@ -37,7 +39,7 @@ impl Date {
 pub struct Item {
     pub id: i32,
     pub name: String,
-    pub deadline: Date,
+    pub expiration_date: ExpirationDate,
     pub used: bool,
 }
 
@@ -45,18 +47,14 @@ pub struct Item {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateItem {
     pub name: String,
-    pub year: u32,
-    pub month: u32,
-    pub day: u32,
+    pub expiration_date: ExpirationDate,
 }
 
 // app_logic::update()に使用する構造体の定義
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UpdateItem {
     pub name: Option<String>,
-    pub yread: Option<u32>,
-    pub month: Option<u32>,
-    pub day: Option<u32>,
+    pub expiration_date: Option<ExpirationDate>,
     pub used: Option<bool>,
 }
 
