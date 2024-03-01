@@ -22,12 +22,23 @@ pub struct Date {
     pub day: u32,
 }
 
+impl Date {
+    pub fn new(year: u32, month: u32, day: u32) -> Self {
+        Self {
+            year,
+            month,
+            day,
+        }
+    }
+}
+
 // データベースに使用する構造体の定義
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Item {
     pub id: i32,
     pub name: String,
     pub deadline: Date,
+    pub used: bool,
 }
 
 // app_logic::create()に使用する構造体の定義
@@ -46,6 +57,7 @@ pub struct UpdateItem {
     pub yread: Option<u32>,
     pub month: Option<u32>,
     pub day: Option<u32>,
+    pub used: Option<bool>,
 }
 
 // ValidatedJsonのtrait実装
