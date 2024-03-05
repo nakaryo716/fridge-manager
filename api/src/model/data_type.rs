@@ -1,11 +1,10 @@
-use sqlx::postgres::PgPool;
-
 use serde::{Deserialize, Serialize};
-
+use sqlx::{postgres::PgRow, FromRow, PgPool};
+use sqlx::Row;
 // データベースpool構造体
 #[derive(Debug, Clone)]
 pub struct ItemRepository {
-    pg_pool: PgPool,
+    pub pg_pool: PgPool,
 }
 
 impl ItemRepository {
@@ -17,21 +16,9 @@ impl ItemRepository {
 // 賞味(消費)期限を定義する構造体
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExpirationDate {
-    pub year: u32,
-    pub month: u32,
-    pub day: u32,
-}
-
-// もしかしていらないかも
-// databaseにinsertする際に使用(?)
-impl ExpirationDate {
-    pub fn new(year: u32, month: u32, day: u32) -> Self {
-        Self {
-            year,
-            month,
-            day,
-        }
-    }
+    pub year: i32,
+    pub month: i32,
+    pub day: i32,
 }
 
 // データベースに使用する構造体の定義
@@ -43,6 +30,21 @@ pub struct Item {
     pub used: bool,
 }
 
+// .query_as()を使うためにItemにFromRow Traitを手動実装
+impl FromRow<'_, PgRow> for Item {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            id: row.try_get("id")?,
+            name: row.try_get("name")?,
+            expiration_date: ExpirationDate {
+                year: row.try_get("year")?,
+                month: row.try_get("month")?,
+                day: row.try_get("day")?,
+            },
+            used: row.try_get("used")?,
+        })
+    }
+}
 // app_logic::create()に使用する構造体の定義
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateItem {
