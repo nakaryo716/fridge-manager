@@ -16,14 +16,12 @@ impl RepositoryForDb for ItemRepository {
     // postの内容をdatabaseにinsert
     async fn create(&self, payload: CreateItem) -> Result<Item, RepositoryError> {
         let item = sqlx::query_as::<_, Item>(r#"
-INSERT INTO item (name, year, month, day)
-VALUES ($1, $2, $3, $4)
+INSERT INTO item (name, expiration_date)
+VALUES ($1, $2)
 RETURNING *
         "#)
         .bind(payload.name)
-        .bind(payload.expiration_date.year)
-        .bind(payload.expiration_date.month)
-        .bind(payload.expiration_date.day)
+        .bind(payload.expiration_date)
         .fetch_one(&self.pg_pool)
         .await
        .map_err(|e| match e {
