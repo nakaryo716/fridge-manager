@@ -1,6 +1,6 @@
 use crate::{
     handlers::handler::{delete_item, get_all_item, get_item, index, post_item, update_item},
-    model::app_logic::RepositoryForDb,
+    store::app_logic::RepositoryForDb,
 };
 use axum::{
     routing::{get, post},

@@ -7,7 +7,7 @@ use axum::{
     Json,
 };
 
-use crate::model::{
+use crate::store::{
     app_logic::RepositoryForDb,
     data_type::{CreateItem, UpdateItem, ValidatedJson},
 };

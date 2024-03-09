@@ -1,4 +1,4 @@
 pub mod error_type;
 pub mod handlers;
-pub mod model;
+pub mod store;
 pub mod routers;
