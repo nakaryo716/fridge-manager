@@ -9,11 +9,10 @@ use axum::{
 
 use crate::model::{
     app_logic::RepositoryForDb,
-    data_type::{CreateItem, UpdateItem},
+    data_type::{CreateItem, UpdateItem, ValidatedJson},
 };
 
 pub async fn index() -> impl IntoResponse {
-    tracing::info!("Called index handler");
     Html("<h1>Test</h1>")
 }
 
@@ -27,7 +26,7 @@ pub async fn index() -> impl IntoResponse {
 // postハンドラ
 pub async fn post_item<T: RepositoryForDb>(
     State(repository): State<Arc<T>>,
-    Json(payload): Json<CreateItem>,
+    ValidatedJson(payload): ValidatedJson<CreateItem>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let response = repository.create(payload).await.unwrap();
 
@@ -73,6 +72,3 @@ pub async fn delete_item<T: RepositoryForDb>(
 
     Ok(StatusCode::NO_CONTENT)
 }
-
-// defaultハンドラ
-// Page NotFoundを表示

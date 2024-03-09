@@ -1,5 +1,14 @@
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool, types::chrono};
+use axum::{
+    async_trait,
+    extract::{FromRequest, Request},
+    Json,
+};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use sqlx::{types::chrono, FromRow, PgPool};
+use validator::Validate;
+
+use crate::error_type::ServerError;
+
 // データベースpool構造体
 #[derive(Debug, Clone)]
 pub struct ItemRepository {
@@ -12,14 +21,6 @@ impl ItemRepository {
     }
 }
 
-// 賞味(消費)期限を定義する構造体
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// pub struct ExpirationDate {
-//     pub year: i32,
-//     pub month: i32,
-//     pub day: i32,
-// }
-
 // データベースに使用する構造体の定義
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Item {
@@ -29,34 +30,38 @@ pub struct Item {
     pub used: bool,
 }
 
-// // .query_as()を使うためにItemにFromRow Traitを手動実装
-// impl FromRow<'_, PgRow> for Item {
-//     fn from_row(row: &PgRow) -> sqlx::Result<Self> {
-//         Ok(Self {
-//             id: row.try_get("id")?,
-//             name: row.try_get("name")?,
-//             expiration_date: ExpirationDate {
-//                 year: row.try_get("year")?,
-//                 month: row.try_get("month")?,
-//                 day: row.try_get("day")?,
-//             },
-//             used: row.try_get("used")?,
-//         })
-//     }
-// }
 // app_logic::create()に使用する構造体の定義
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct CreateItem {
+    #[validate(length(min = 1, max = 100, message = "validated error was occurred"))]
     pub name: String,
     pub expiration_date: chrono::NaiveDate,
 }
 
 // app_logic::update()に使用する構造体の定義
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct UpdateItem {
+    #[validate(length(min = 1, max = 100, message = "validated error was occurred"))]
     pub name: Option<String>,
     pub expiration_date: Option<chrono::NaiveDate>,
     pub used: Option<bool>,
 }
 
-// ValidatedJsonのtrait実装
+// ValidatedJsonをRequestにするためのFromRequest trait実装
+#[derive(Debug, Clone)]
+pub struct ValidatedJson<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequest<S> for ValidatedJson<T>
+where
+    T: DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = ServerError;
+
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let Json(value) = Json::<T>::from_request(req, state).await?;
+        value.validate()?;
+        Ok(ValidatedJson(value))
+    }
+}
