@@ -15,28 +15,32 @@ pub trait RepositoryForDb: Clone + std::marker::Send + std::marker::Sync + 'stat
 impl RepositoryForDb for ItemRepository {
     // postの内容をdatabaseにinsert
     async fn create(&self, payload: CreateItem) -> Result<Item, RepositoryError> {
-        let item = sqlx::query_as::<_, Item>(r#"
+        let item = sqlx::query_as::<_, Item>(
+            r#"
 INSERT INTO item (name, expiration_date)
 VALUES ($1, $2)
 RETURNING *
-        "#)
+        "#,
+        )
         .bind(payload.name)
         .bind(payload.expiration_date)
         .fetch_one(&self.pg_pool)
         .await
-       .map_err(|e| match e {
+        .map_err(|e| match e {
             sqlx::Error::RowNotFound => RepositoryError::NotFoud(0),
-            _ => RepositoryError::Unexpected,     
-       })?;
+            _ => RepositoryError::Unexpected,
+        })?;
         Ok(item)
     }
 
     // 任意のidのデータをdatabaseから取得
     async fn read(&self, id: i32) -> Result<Item, RepositoryError> {
-        let item = sqlx::query_as::<_, Item>(r#"
+        let item = sqlx::query_as::<_, Item>(
+            r#"
 SELECT * FROM item
 WHERE id = $1
-        "#)
+        "#,
+        )
         .bind(id)
         .fetch_one(&self.pg_pool)
         .await
@@ -50,12 +54,14 @@ WHERE id = $1
 
     // データベースにあるすべてのデータの取得
     async fn read_all(&self) -> Result<Vec<Item>, RepositoryError> {
-        let item = sqlx::query_as::<_, Item>(r#"
+        let item = sqlx::query_as::<_, Item>(
+            r#"
 SELECT * FROM item
-        "#)
+        "#,
+        )
         .fetch_all(&self.pg_pool)
         .await
-        .map_err(|e| match  e  {
+        .map_err(|e| match e {
             sqlx::Error::RowNotFound => RepositoryError::NotFoud(0),
             _ => RepositoryError::Unexpected,
         })?;
