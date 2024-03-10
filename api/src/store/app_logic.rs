@@ -26,10 +26,8 @@ RETURNING *
         .bind(payload.expiration_date)
         .fetch_one(&self.pg_pool)
         .await
-        .map_err(|e| match e {
-            sqlx::Error::RowNotFound => RepositoryError::NotFoud(0),
-            _ => RepositoryError::Unexpected,
-        })?;
+        .or(Err(RepositoryError::Unexpected))?;
+
         Ok(item)
     }
 
@@ -57,21 +55,19 @@ WHERE id = $1
         let item = sqlx::query_as::<_, Item>(
             r#"
 SELECT * FROM item
+ORDER BY id
         "#,
         )
         .fetch_all(&self.pg_pool)
         .await
-        .map_err(|e| match e {
-            sqlx::Error::RowNotFound => RepositoryError::NotFoud(0),
-            _ => RepositoryError::Unexpected,
-        })?;
+        .or(Err(RepositoryError::Unexpected))?;
 
         Ok(item)
     }
 
     // 任意のidのデータを更新
     async fn update(&self, id: i32, payload: UpdateItem) -> Result<Item, RepositoryError> {
-        let old_item = self.read(id).await.unwrap();
+        let old_item = self.read(id).await?;
 
         let insert_name = match payload.name {
             Some(value) => value,
@@ -101,7 +97,10 @@ RETURNING *
         .bind(id)
         .fetch_one(&self.pg_pool)
         .await
-        .unwrap();
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => RepositoryError::NotFoud(id),
+            _ => RepositoryError::Unexpected,
+        })?;
 
         Ok(item)
     }
@@ -117,7 +116,10 @@ WHERE id = $1
         .bind(id)
         .execute(&self.pg_pool)
         .await
-        .unwrap();
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => RepositoryError::NotFoud(id),
+            _ => RepositoryError::Unexpected,
+        })?;
 
         Ok(())
     }
