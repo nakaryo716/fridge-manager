@@ -1,4 +1,4 @@
-use api::{routers::marge_route, store::data_type::ItemRepository};
+use api::{routers, store::ItemRepository};
 use sqlx::postgres::PgPoolOptions;
 use std::error;
 use tracing::Level;
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     let respository = ItemRepository::new(pool);
 
     // ルーティング
-    let app = marge_route::app(respository);
+    let app = routers::app(respository);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
