@@ -1,15 +1,7 @@
-use super::data_type::{CreateItem, Item, ItemRepository, UpdateItem};
+use super::RepositoryForDb;
 use crate::error_type::RepositoryError;
+use crate::store::{CreateItem, Item, ItemRepository, UpdateItem};
 use async_trait::async_trait;
-
-#[async_trait]
-pub trait RepositoryForDb: Clone + std::marker::Send + std::marker::Sync + 'static {
-    async fn create(&self, payload: CreateItem) -> Result<Item, RepositoryError>;
-    async fn read(&self, id: i32) -> Result<Item, RepositoryError>;
-    async fn read_all(&self) -> Result<Vec<Item>, RepositoryError>;
-    async fn update(&self, id: i32, payload: UpdateItem) -> Result<Item, RepositoryError>;
-    async fn delete(&self, id: i32) -> Result<(), RepositoryError>;
-}
 
 #[async_trait]
 impl RepositoryForDb for ItemRepository {
