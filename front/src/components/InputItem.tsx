@@ -13,7 +13,7 @@ export const InputItem = () => {
     const sequentialMonth = Array.from({length: 12}, (_, i) => i + 1);
     const sequentialDate = Array.from({length: 31}, (_, i) => i + 1);
 
-    const [todos, setTodos] = useState<string[]>([]);
+    const [items, setItems] = useState<string[]>([]);
     const [text, setText] = useState("");
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
@@ -25,11 +25,15 @@ export const InputItem = () => {
     };
 
     const onSubmit = () => {
-        setTodos([text, ...todos]);
-        console.log(todos);
+        setItems([text, ...items]);
+        console.log(items);
         console.log(selectedYear);
         console.log(selectedMonth);
         console.log(selectedDate);
+        setText("");
+        setSelectedYear(currentYear);
+        setSelectedMonth(currentMonth);
+        setSelectedDate(currentDate);
     };
     
     const onChengeYear = (e: SelectChangeEvent<number>) => {
@@ -47,10 +51,10 @@ export const InputItem = () => {
     return(
         <>
             <div style={{textAlign: "center", margin: 40}}>
-                <TextField sx={{width: 400}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)}/>
+                <TextField sx={{width: 400}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)} value={text}/>
                 <FormControl sx={{minWidth: 120, marginLeft: 2}}>
                     <InputLabel>Year</InputLabel>
-                    <Select defaultValue={currentYear} onChange={(e) => onChengeYear(e)}>
+                    <Select defaultValue={currentYear} onChange={(e) => onChengeYear(e)} value={selectedYear}>
                         {sequentialYear.map((year) => {
                             return(
                                 <MenuItem value={year}>{year}</MenuItem>
@@ -60,7 +64,7 @@ export const InputItem = () => {
                 </FormControl>
                 <FormControl sx={{minWidth: 120, marginLeft: 1}}>
                     <InputLabel>Month</InputLabel>
-                    <Select defaultValue={currentMonth} onChange={(e) => onChengeMonth(e)}>
+                    <Select defaultValue={currentMonth} onChange={(e) => onChengeMonth(e)} value={selectedMonth}>
                         {sequentialMonth.map((month) => {
                             return(
                                 <MenuItem value={month}>{month}</MenuItem>
@@ -70,7 +74,7 @@ export const InputItem = () => {
                 </FormControl>
                 <FormControl sx={{minWidth: 120, marginLeft: 1}}>
                     <InputLabel>Date</InputLabel>
-                    <Select defaultValue={currentDate} onChange={(e) => onChengeDate(e)}>
+                    <Select defaultValue={currentDate} onChange={(e) => onChengeDate(e)} value={selectedDate}>
                         {sequentialDate.map((valueNum) => {
                             return(
                                 <MenuItem value={valueNum}>{valueNum}</MenuItem>
