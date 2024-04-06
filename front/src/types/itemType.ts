@@ -1,11 +1,11 @@
-export type Item = {
+export type TrackedFood = {
     id: number,
-    name: string,
+    foodName: string,
     expirationDate: Date,
     used: boolean,
 };
 
-export type newItemPayload = {
-    name: string,
+export type NewFoodPayload = {
+    foodName: string,
     expirationDate: Date,
 };

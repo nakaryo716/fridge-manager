@@ -1,6 +1,6 @@
-import { Item, newItemPayload } from "../types/itemType";
+import { TrackedFood, NewFoodPayload } from "../types/itemType";
 
-export const postItems = async (payload: newItemPayload) => {
+export const postItems = async (payload: NewFoodPayload) => {
     const res = await fetch("http://localhost:3000/fridge", {
         method: "POST",
         headers: {
@@ -13,7 +13,7 @@ export const postItems = async (payload: newItemPayload) => {
         throw new Error("Could not post data");
     }
 
-    const responseJson: Item = await res.json();
+    const responseJson: TrackedFood = await res.json();
     return responseJson;
 };
 
@@ -24,11 +24,11 @@ export const getAllItem = async () => {
         throw new Error("Could not get items");
     }
 
-    const responseJson: Item = await res.json();
+    const responseJson: TrackedFood = await res.json();
     return responseJson;
 };
 
-export const updateItem = async (payload: Item) => {
+export const updateItem = async (payload: TrackedFood) => {
     const {id, ...updateContents} = payload;
 
     const res = await fetch(`http://localhost:3000/fridge/${id}`, {
@@ -43,7 +43,7 @@ export const updateItem = async (payload: Item) => {
         throw new Error("Could not update item");
     }
 
-    const responseJson: Item = await res.json();
+    const responseJson: TrackedFood = await res.json();
     return responseJson;
 }
 
