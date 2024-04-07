@@ -1,22 +1,28 @@
 import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material"
 import React, { useState } from "react";
+import { NewFoodPayload } from "../types/itemType";
 
-export const InputItem = () => {
+type Props = {
+    onSubmitHandle: (payload: NewFoodPayload) => Promise<void>;
+};
+
+export const InputItem = (props: Props) => {
+    const { onSubmitHandle } = props;
+
     // デフォルト値を設定するために現在の日付を取得
     const currentYMD = new Date();
     const currentYear = currentYMD.getFullYear();
-    const currentMonth = currentYMD.getUTCMonth();
-    const currentDate = currentYMD.getUTCDay();
+    const currentMonth = currentYMD.getMonth();
+    const currentDate = currentYMD.getDate();
 
     // セレクトバーに表示するための連番生成
     const sequentialYear = Array.from({length: 15}, (_, i) => (currentYear - 1) + i + 1);
     const sequentialMonth = Array.from({length: 12}, (_, i) => i + 1);
     const sequentialDate = Array.from({length: 31}, (_, i) => i + 1);
 
-    const [items, setItems] = useState<string[]>([]);
     const [text, setText] = useState("");
     const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth + 1);
     const [selectedDate, setSelectedDate] = useState(currentDate);
 
     const followTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,18 +30,6 @@ export const InputItem = () => {
         console.log(text);
     };
 
-    const onSubmit = () => {
-        setItems([text, ...items]);
-        console.log(items);
-        console.log(selectedYear);
-        console.log(selectedMonth);
-        console.log(selectedDate);
-        setText("");
-        setSelectedYear(currentYear);
-        setSelectedMonth(currentMonth);
-        setSelectedDate(currentDate);
-    };
-    
     const onChengeYear = (e: SelectChangeEvent<number>) => {
         setSelectedYear(e.target.value as number);
     };
@@ -48,6 +42,28 @@ export const InputItem = () => {
         setSelectedDate(e.target.value as number);
     };
 
+    // 追加ボタンを押した際のAPI Call + Inputコンポーネント初期化
+    const onSubmit = async () => {
+        const ymd = `${selectedYear}-${selectedMonth}-${selectedDate}`;
+        const payload: NewFoodPayload = {
+            name: text,
+            expiration_date: ymd
+        };
+        
+        if (!payload.name) {
+            setSelectedYear(currentYear);
+            setSelectedMonth(currentMonth + 1);
+            setSelectedDate(currentDate);
+            return;
+        }
+        await onSubmitHandle(payload);
+
+        setText("");
+        setSelectedYear(currentYear);
+        setSelectedMonth(currentMonth + 1);
+        setSelectedDate(currentDate);
+    };
+    
     return(
         <>
             <div style={{textAlign: "center", margin: 40}}>
@@ -57,7 +73,7 @@ export const InputItem = () => {
                     <Select value={selectedYear} onChange={(e) => onChengeYear(e)}>
                         {sequentialYear.map((year) => {
                             return(
-                                <MenuItem value={year}>{year}</MenuItem>
+                                <MenuItem key={year} value={year}>{year}</MenuItem>
                             );
                         })}
                     </Select>
@@ -67,7 +83,7 @@ export const InputItem = () => {
                     <Select value={selectedMonth} onChange={(e) => onChengeMonth(e)}>
                         {sequentialMonth.map((month) => {
                             return(
-                                <MenuItem value={month}>{month}</MenuItem>
+                                <MenuItem key={month} value={month}>{month}</MenuItem>
                             );
                         })}
                     </Select>
@@ -75,9 +91,9 @@ export const InputItem = () => {
                 <FormControl sx={{minWidth: 120, marginLeft: 1}}>
                     <InputLabel>Date</InputLabel>
                     <Select value={selectedDate} onChange={(e) => onChengeDate(e)}>
-                        {sequentialDate.map((valueNum) => {
+                        {sequentialDate.map((date) => {
                             return(
-                                <MenuItem value={valueNum}>{valueNum}</MenuItem>
+                                <MenuItem key={date}value={date}>{date}</MenuItem>
                             );
                         })}
                     </Select>
