@@ -1,11 +1,13 @@
+// APIとの型をそろえるためにスネークケースになっている
+// expiration_dateはAPI側のDate型がタイムゾーンに対応してないためstring型にしている
 export type TrackedFood = {
     id: number,
-    foodName: string,
-    expirationDate: Date,
+    name: string,
+    expiration_date: string,
     used: boolean,
 };
 
 export type NewFoodPayload = {
-    foodName: string,
-    expirationDate: Date,
+    name: string,
+    expiration_date: string,
 };

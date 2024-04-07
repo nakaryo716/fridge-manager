@@ -1,12 +1,12 @@
 import { TrackedFood, NewFoodPayload } from "../types/itemType";
 
-export const postItems = async (payload: NewFoodPayload) => {
+export const postFoodApi = async (payload: NewFoodPayload) => {
     const res = await fetch("http://localhost:3000/fridge", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
     });
 
     if (!res) {
@@ -17,18 +17,18 @@ export const postItems = async (payload: NewFoodPayload) => {
     return responseJson;
 };
 
-export const getAllItem = async () => {
+export const getAllFoodsApi = async () => {
     const res = await fetch("http://localhost:3000/fridge");
 
     if (!res) {
         throw new Error("Could not get items");
     }
 
-    const responseJson: TrackedFood = await res.json();
+    const responseJson: TrackedFood[] = await res.json();
     return responseJson;
 };
 
-export const updateItem = async (payload: TrackedFood) => {
+export const updateFoodApi = async (payload: TrackedFood) => {
     const {id, ...updateContents} = payload;
 
     const res = await fetch(`http://localhost:3000/fridge/${id}`, {
@@ -47,7 +47,7 @@ export const updateItem = async (payload: TrackedFood) => {
     return responseJson;
 }
 
-export const deleteItem = async (id: number) => {
+export const deleteFoodApi = async (id: number) => {
     const res = await fetch(`http://localhost:3000/fridge/${id}`, {
         method: "DELETE",
     });
