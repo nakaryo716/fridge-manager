@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { InputItem } from "./components/InputItem"
-import { NewFoodPayload, TrackedFood } from "./types/itemType";
+import { NewFoodPayload, TrackedFood, UpdateFoodPayload } from "./types/itemType";
 import { deleteFoodApi, getAllFoodsApi, postFoodApi, updateFoodApi } from "./api/callApi";
+import { ItemList } from "./components/ItemList";
 
 export const App = () => {
   const [foods, setFoods] = useState<TrackedFood[]>([]);
@@ -11,11 +12,10 @@ export const App = () => {
 
     const modifiedFoods = await getAllFoodsApi();
     setFoods(modifiedFoods);
-    console.log(foods);
   };
 
-  const onUpdateHandle = async (payload: TrackedFood) => {
-    await updateFoodApi(payload);
+  const onUpdateHandle = async (id: number, payload: UpdateFoodPayload) => {
+    await updateFoodApi(id, payload);
 
     const modifiedFoods = await getAllFoodsApi();
     setFoods(modifiedFoods);
@@ -40,6 +40,7 @@ export const App = () => {
     <>
       <h1 style={{textAlign: "center"}}>賞味・消費期限マネージャ</h1>
       <InputItem onSubmitHandle={onSubmitHandle} />
+      <ItemList foods={foods} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle}></ItemList>
     </>
   );
 };
