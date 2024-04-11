@@ -27,7 +27,6 @@ export const InputItem = (props: Props) => {
 
     const followTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
         setText(e.target.value);
-        console.log(text);
     };
 
     const onChengeYear = (e: SelectChangeEvent<number>) => {
@@ -43,7 +42,7 @@ export const InputItem = (props: Props) => {
     };
 
     // 追加ボタンを押した際のAPI Call + Inputコンポーネント初期化
-    const onSubmit = async () => {
+    const onClickSubmit = async () => {
         const ymd = `${selectedYear}-${selectedMonth}-${selectedDate}`;
         const payload: NewFoodPayload = {
             name: text,
@@ -98,7 +97,7 @@ export const InputItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <Button size="large" variant="contained" sx={{height: 56, width: 180, marginLeft: 4}} onClick={() => onSubmit()}>追加</Button>
+                <Button size="large" variant="contained" sx={{height: 56, width: 180, marginLeft: 4}} onClick={() => onClickSubmit()}>追加</Button>
             </div>
         </>
     );
