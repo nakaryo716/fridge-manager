@@ -3,7 +3,7 @@ use crate::{
     store::RepositoryForDb,
 };
 use axum::{
-    http::{header::CONTENT_TYPE, HeaderValue, Method}, routing::{get, post}, Router
+    http::{header::CONTENT_TYPE, Method}, routing::{get, post}, Router
 };
 use tower_http::cors::{Any, CorsLayer};
 use std::sync::Arc;
