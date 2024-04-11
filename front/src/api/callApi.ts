@@ -1,4 +1,4 @@
-import { TrackedFood, NewFoodPayload } from "../types/itemType";
+import { TrackedFood, NewFoodPayload, UpdateFoodPayload } from "../types/itemType";
 
 export const postFoodApi = async (payload: NewFoodPayload) => {
     const res = await fetch("http://localhost:3000/fridge", {
@@ -28,15 +28,13 @@ export const getAllFoodsApi = async () => {
     return responseJson;
 };
 
-export const updateFoodApi = async (payload: TrackedFood) => {
-    const {id, ...updateContents} = payload;
-
+export const updateFoodApi = async (id: number, payload: UpdateFoodPayload) => {
     const res = await fetch(`http://localhost:3000/fridge/${id}`, {
         method: "PUT",
         headers: {
-            "Contents-Type": "application/json",
+            "Content-Type": "application/json",
         },
-        body: JSON.stringify(updateContents),
+        body: JSON.stringify(payload),
     });
 
     if (!res) {

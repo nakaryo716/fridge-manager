@@ -11,3 +11,9 @@ export type NewFoodPayload = {
     name: string,
     expiration_date: string,
 };
+
+export type UpdateFoodPayload = {
+    name: string,
+    expiration_date: string,
+    used: boolean,
+};
