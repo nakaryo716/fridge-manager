@@ -2,7 +2,6 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 import { TrackedFood, UpdateFoodPayload } from "../types/itemType";
 import { FoodItem } from "./FoodItem";
 
-
 type Props = {
     foods: TrackedFood[],
     onUpdateHandle: (id: number, payload: UpdateFoodPayload) => Promise<void>,
@@ -27,7 +26,7 @@ export const ItemList = (props: Props) => {
                     <TableBody>
                         {foods.map((food) => {
                             return(
-                                <FoodItem food={food} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle} />
+                                <FoodItem key={food.id} food={food} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle} />
                             )
                         })}
                     </TableBody>

@@ -11,21 +11,21 @@ type Props = {
 export const EditItem = (props: Props) => {
     const { food, onUpdateHandle, setModalFlag } = props;
 
-    // デフォルト値を設定するために現在の日付を取得
-    const currentYMD = new Date();
-    const currentYear = currentYMD.getFullYear();
-    const currentMonth = currentYMD.getMonth();
-    const currentDate = currentYMD.getDate();
+    // foodの賞味期限をセレクトバーに表示するためにnumberに変換
+    const settingYmd = food.expiration_date.split("-");
+    const settingYear = parseInt(settingYmd[0]);
+    const settingmonth = parseInt(settingYmd[1]);
+    const settingDate = parseInt(settingYmd[2]);
 
     // セレクトバーに表示するための連番生成
-    const sequentialYear = Array.from({length: 15}, (_, i) => (currentYear - 1) + i + 1);
+    const sequentialYear = Array.from({length: 15}, (_, i) => (settingYear - 1) + i + 1);
     const sequentialMonth = Array.from({length: 12}, (_, i) => i + 1);
     const sequentialDate = Array.from({length: 31}, (_, i) => i + 1);
 
     const [text, setText] = useState("");
-    const [selectedYear, setSelectedYear] = useState(currentYear);
-    const [selectedMonth, setSelectedMonth] = useState(currentMonth + 1);
-    const [selectedDate, setSelectedDate] = useState(currentDate);
+    const [selectedYear, setSelectedYear] = useState(settingYear);
+    const [selectedMonth, setSelectedMonth] = useState(settingmonth);
+    const [selectedDate, setSelectedDate] = useState(settingDate);
 
     const followTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
         setText(e.target.value);
@@ -44,7 +44,6 @@ export const EditItem = (props: Props) => {
     };
 
     const onClickEdit = async () => {
-        console.log(food.id);
         const ymd = `${selectedYear}-${selectedMonth}-${selectedDate}`;
         const payload: UpdateFoodPayload = {
             name: text,
@@ -53,17 +52,10 @@ export const EditItem = (props: Props) => {
         };
         
         if (!payload.name) {
-            setSelectedYear(currentYear);
-            setSelectedMonth(currentMonth + 1);
-            setSelectedDate(currentDate);
-            return;
+            payload.name = food.name;
         }
-        await onUpdateHandle(food.id, payload);
 
-        setText("");
-        setSelectedYear(currentYear);
-        setSelectedMonth(currentMonth + 1);
-        setSelectedDate(currentDate);
+        await onUpdateHandle(food.id, payload);
         setModalFlag(false);
     };
     

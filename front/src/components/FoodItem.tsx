@@ -28,10 +28,7 @@ export const FoodItem = (props: Props) => {
     };
 
     const [modalFlag, setModalFlag] = useState(false);
-    const modalOpen = (id: number) => {
-        console.log(id);
-        setModalFlag(true);
-    }
+    const modalOpen = () => setModalFlag(true);
     const modalClose = () => setModalFlag(false);
 
     return(
@@ -39,7 +36,7 @@ export const FoodItem = (props: Props) => {
         <TableCell align="left"><Checkbox onChange={() => onClickCheckBox(food)} checked={food.used}/>{food.name}</TableCell>
         <TableCell align="left">{food.expiration_date}</TableCell>
         <TableCell align="left">
-            <Button key={food.id} variant="contained" sx={{backgroundColor: "mediumturquoise", "&:hover":{backgroundColor: "darkcyan"}}} onClick={() => modalOpen(food.id)}>編集</Button>
+            <Button key={food.id} variant="contained" sx={{backgroundColor: "mediumturquoise", "&:hover":{backgroundColor: "darkcyan"}}} onClick={modalOpen}>編集</Button>
             <Modal open={modalFlag} onClose={modalClose}>
                 <Box sx={style}>
                     <EditItem food={food} onUpdateHandle={onUpdateHandle} setModalFlag={setModalFlag}></EditItem>
