@@ -3,9 +3,9 @@ use crate::{
     store::RepositoryForDb,
 };
 use axum::{
-    http::{header::CONTENT_TYPE, Method}, routing::{get, post}, Router
+    http::{header::CONTENT_TYPE, HeaderValue, Method}, routing::{get, post}, Router
 };
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use std::sync::Arc;
 
 // ルーティングの設定
@@ -21,8 +21,8 @@ pub fn app<T: RepositoryForDb>(repository: T) -> Router {
         .layer(
             CorsLayer::new()
                 // "http://localhost:5173".parse::<HeaderValue>().unwrap()
-                .allow_origin(Any)
+                .allow_origin("http://100.64.1.18:5173".parse::<HeaderValue>().unwrap())
                 .allow_methods(vec![Method::POST, Method::GET, Method::PUT, Method::DELETE])
-                .allow_headers(vec![CONTENT_TYPE])
+                .allow_headers(vec![CONTENT_TYPE,])
         )
 }
