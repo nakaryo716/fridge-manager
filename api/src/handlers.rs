@@ -1,6 +1,6 @@
 use crate::{
     error_type::RepositoryError,
-    store::{CreateItem, RepositoryForDb, UpdateItem, ValidatedJson},
+    model::{CreateItem, RepositoryForDb, UpdateItem, ValidatedJson},
 };
 use axum::{
     extract::{Path, State},
@@ -9,7 +9,7 @@ use axum::{
     Json,
 };
 use std::sync::Arc;
-mod utility;
+mod test;
 
 pub async fn test() -> impl IntoResponse {
     Html("<h1>Test</h1>")
