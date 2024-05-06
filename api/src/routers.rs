@@ -1,6 +1,6 @@
 use crate::{
     handlers::{delete_item, get_all_item, get_item, post_item, test, update_item},
-    store::RepositoryForDb,
+    model::RepositoryForDb,
 };
 use axum::{
     http::{header::CONTENT_TYPE, Method}, routing::{get, post}, Router

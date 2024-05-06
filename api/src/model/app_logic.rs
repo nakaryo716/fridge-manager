@@ -1,6 +1,6 @@
 use super::RepositoryForDb;
 use crate::error_type::RepositoryError;
-use crate::store::{CreateItem, Item, ItemRepository, UpdateItem};
+use crate::model::{CreateItem, Item, ItemRepository, UpdateItem};
 use async_trait::async_trait;
 
 #[async_trait]

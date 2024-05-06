@@ -1,4 +1,4 @@
-use api::{routers, store::ItemRepository};
+use api::{routers, model::ItemRepository};
 use sqlx::postgres::PgPoolOptions;
 use std::error;
 use tracing::Level;
