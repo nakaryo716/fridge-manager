@@ -1,4 +1,4 @@
-use api::{routers, model::ItemRepository};
+use api::{model::repository::FoodsRepository, routers};
 use sqlx::postgres::PgPoolOptions;
 use std::error;
 use tracing::Level;
@@ -14,26 +14,23 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
 
     // database_urlの設定
     dotenvy::dotenv()?;
-    let db_connection_str = std::env::var("DATABASE_URL").expect("can't find database");
-    println!("{}", db_connection_str);
+    let db_url = std::env::var("DATABASE_URL").expect("can't find database");
 
     // database 接続
     let pool = PgPoolOptions::new()
-        .connect(&db_connection_str)
+        .connect(&db_url)
         .await
         .expect("can't connect to database");
 
-    let respository = ItemRepository::new(pool);
+    let respository = FoodsRepository::new(pool);
 
     // ルーティング
-    let app = routers::app(respository);
+    let services = routers::services(respository);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     tracing::info!("Listening on {:?}", listener);
 
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, services).await.unwrap();
 
     Ok(())
 }
