@@ -22,10 +22,10 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         .await
         .expect("can't connect to database");
 
-    let respository = FoodsRepository::new(pool);
+    let foods_repository = FoodsRepository::new(pool);
 
     // ルーティング
-    let services = routers::services(respository);
+    let services = routers::services(foods_repository);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     tracing::info!("Listening on {:?}", listener);

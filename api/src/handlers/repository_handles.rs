@@ -1,6 +1,9 @@
 use crate::{
     error_type::{RepositoryError, ServerError},
-    model::repository::{CreateFood, CrudForDb, UpdateFood},
+    model::{
+        repository::{CreateFood, FoodsRepository, UpdateFood},
+        CrudForDb,
+    },
 };
 use axum::{
     async_trait,
@@ -9,8 +12,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use sqlx::{FromRow, Row};
+use serde::de::DeserializeOwned;
 use std::sync::Arc;
 use validator::Validate;
 
@@ -34,17 +36,10 @@ where
     }
 }
 
-// トレイト境界がいろいろ書かれているが、単純にデータベースとのやり取りができる
-//Crudトレイトが実装されたリポジトリをStateとして置いておくことを示しているだけ
-pub async fn post_food<'a, S, T, R>(
-    State(repository): State<Arc<S>>,
+pub async fn post_food(
+    State(repository): State<Arc<FoodsRepository>>,
     ValidatedJson(payload): ValidatedJson<CreateFood>,
-) -> Result<impl IntoResponse, StatusCode>
-where
-    S: CrudForDb<'a, T, R>,
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
+) -> Result<impl IntoResponse, StatusCode> {
     let response = repository.create(payload).await.map_err(|e| match e {
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         _ => StatusCode::SERVICE_UNAVAILABLE,
@@ -53,15 +48,10 @@ where
     Ok((StatusCode::CREATED, Json(response)))
 }
 
-pub async fn get_food<'a, S, T, R>(
-    State(repository): State<Arc<S>>,
+pub async fn get_food(
+    State(repository): State<Arc<FoodsRepository>>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, StatusCode>
-where
-    S: CrudForDb<'a, T, R>,
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
+) -> Result<impl IntoResponse, StatusCode> {
     let item = repository.read(id).await.map_err(|e| match e {
         RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
@@ -70,14 +60,9 @@ where
     Ok((StatusCode::OK, Json(item)))
 }
 
-pub async fn get_all_foods<'a, S, T, R>(
-    State(repository): State<Arc<S>>,
-) -> Result<impl IntoResponse, StatusCode>
-where
-    S: CrudForDb<'a, T, R>,
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
+pub async fn get_all_foods(
+    State(repository): State<Arc<FoodsRepository>>,
+) -> Result<impl IntoResponse, StatusCode> {
     let item = repository.read_all().await.map_err(|e| match e {
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         _ => StatusCode::SERVICE_UNAVAILABLE,
@@ -86,16 +71,11 @@ where
     Ok((StatusCode::OK, Json(item)))
 }
 
-pub async fn update_food<'a, S, T, R>(
-    State(repository): State<Arc<S>>,
+pub async fn update_food(
+    State(repository): State<Arc<FoodsRepository>>,
     Path(id): Path<i32>,
     Json(payload): Json<UpdateFood>,
-) -> Result<impl IntoResponse, StatusCode>
-where
-    S: CrudForDb<'a, T, R>,
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
+) -> Result<impl IntoResponse, StatusCode> {
     let item = repository.update(id, payload).await.map_err(|e| match e {
         RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
@@ -104,15 +84,10 @@ where
     Ok((StatusCode::OK, Json(item)))
 }
 
-pub async fn delete_food<'a, S, T, R>(
-    State(repository): State<Arc<S>>,
+pub async fn delete_food(
+    State(repository): State<Arc<FoodsRepository>>,
     Path(id): Path<i32>,
-) -> Result<impl IntoResponse, StatusCode>
-where
-    S: CrudForDb<'a, T, R>,
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
+) -> Result<impl IntoResponse, StatusCode> {
     repository.delete(id).await.map_err(|e| match e {
         RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,

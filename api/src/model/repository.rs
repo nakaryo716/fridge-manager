@@ -1,14 +1,17 @@
 use crate::error_type::RepositoryError;
 use axum::async_trait;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::PgRow, types::chrono, FromRow, PgPool, Row};
+use sqlx::{postgres::PgRow, types::chrono, FromRow, PgPool};
+use std::fmt::Debug;
 use validator::Validate;
+
+use super::CrudForDb;
 
 // 冷蔵庫内の食品のパラメータ
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct Food {
-    pub id: i32,
-    pub name: String,
+    pub food_id: i32,
+    pub food_name: String,
     pub expiration: chrono::NaiveDate,
     pub used: bool,
 }
@@ -17,7 +20,7 @@ pub struct Food {
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct CreateFood {
     #[validate(length(min = 1, max = 100, message = "validated error was occurred"))]
-    pub name: String,
+    pub food_name: String,
     pub expiration: chrono::NaiveDate,
 }
 
@@ -25,25 +28,9 @@ pub struct CreateFood {
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct UpdateFood {
     #[validate(length(min = 1, max = 100, message = "validated error was occurred"))]
-    pub name: Option<String>,
-    pub expiration_date: Option<chrono::NaiveDate>,
+    pub food_name: Option<String>,
+    pub expiration: Option<chrono::NaiveDate>,
     pub used: Option<bool>,
-}
-
-// DBに対して一般的なCRUD操作を実装させるトレイト
-// 戻り値は任意の種類(Pg, MySql, SqLite)から得たデータが
-// Json化することができることをトレイト境界として指定している
-#[async_trait]
-pub trait CrudForDb<'a, T, R>: Clone + std::marker::Send + std::marker::Sync + 'static
-where
-    T: Serialize + Deserialize<'a> + FromRow<'a, R>,
-    R: Row,
-{
-    async fn create(&self, payload: CreateFood) -> Result<T, RepositoryError>;
-    async fn read(&self, id: i32) -> Result<T, RepositoryError>;
-    async fn read_all(&self) -> Result<Vec<T>, RepositoryError>;
-    async fn update(&self, id: i32, payload: UpdateFood) -> Result<T, RepositoryError>;
-    async fn delete(&self, id: i32) -> Result<(), RepositoryError>;
 }
 
 // Food構造体を管理するためのラッパー構造体
@@ -59,19 +46,20 @@ impl FoodsRepository {
     }
 }
 
+// CrudForDbトレイトの実装部分
 // Postgresからの操作によるJsonシリアライズ/デシリアライズ可能
 // Food構造体を戻り値として実装
 #[async_trait]
-impl CrudForDb<'_, Food, PgRow> for FoodsRepository {
+impl CrudForDb<'_, Food, PgRow, CreateFood, UpdateFood> for FoodsRepository {
     async fn create(&self, payload: CreateFood) -> Result<Food, RepositoryError> {
         let item = sqlx::query_as::<_, Food>(
             r#"
-INSERT INTO item (name, expiration_date)
+INSERT INTO item (food_name, expiration)
 VALUES ($1, $2)
 RETURNING *
         "#,
         )
-        .bind(payload.name)
+        .bind(payload.food_name)
         .bind(payload.expiration)
         .fetch_one(&self.pool)
         .await
@@ -84,7 +72,7 @@ RETURNING *
         let item = sqlx::query_as::<_, Food>(
             r#"
 SELECT * FROM item
-WHERE id = $1
+WHERE food_id = $1
         "#,
         )
         .bind(id)
@@ -102,7 +90,7 @@ WHERE id = $1
         let item = sqlx::query_as::<_, Food>(
             r#"
 SELECT * FROM item
-ORDER BY id
+ORDER BY food_id
         "#,
         )
         .fetch_all(&self.pool)
@@ -115,12 +103,12 @@ ORDER BY id
     async fn update(&self, id: i32, payload: UpdateFood) -> Result<Food, RepositoryError> {
         let old_item = self.read(id).await?;
 
-        let insert_name = match payload.name {
+        let insert_food = match payload.food_name {
             Some(value) => value,
-            None => old_item.name,
+            None => old_item.food_name,
         };
 
-        let insert_expiration_date = match payload.expiration_date {
+        let insert_expiration = match payload.expiration {
             Some(value) => value,
             None => old_item.expiration,
         };
@@ -132,13 +120,13 @@ ORDER BY id
 
         let item = sqlx::query_as::<_, Food>(
             r#"
-UPDATE item SET (name, expiration_date, used) = ($1, $2, $3)
+UPDATE item SET (food_name, expiration, used) = ($1, $2, $3)
 WHERE id = $4
 RETURNING *
         "#,
         )
-        .bind(insert_name)
-        .bind(insert_expiration_date)
+        .bind(insert_food)
+        .bind(insert_expiration)
         .bind(insert_used)
         .bind(id)
         .fetch_one(&self.pool)
@@ -155,7 +143,7 @@ RETURNING *
         sqlx::query(
             r#"
 DELETE FROM item
-WHERE id = $1
+WHERE food_id = $1
         "#,
         )
         .bind(id)
