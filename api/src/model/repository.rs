@@ -90,7 +90,7 @@ WHERE food_id = $1
         let item = sqlx::query_as::<_, Food>(
             r#"
 SELECT * FROM item
-ORDER BY food_id
+ORDER BY expiration
         "#,
         )
         .fetch_all(&self.pool)
@@ -121,7 +121,7 @@ ORDER BY food_id
         let item = sqlx::query_as::<_, Food>(
             r#"
 UPDATE item SET (food_name, expiration, used) = ($1, $2, $3)
-WHERE id = $4
+WHERE food_id = $4
 RETURNING *
         "#,
         )
