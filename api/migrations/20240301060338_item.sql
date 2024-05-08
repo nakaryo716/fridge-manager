@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS item (
-    id                  SERIAL  PRIMARY KEY,
-    name                TEXT    NOT NULL,
-    expiration_date     DATE    NOT NULL,
-    used                BOOLEAN NOT NULL DEFAULT FALSE
+    food_id        SERIAL  PRIMARY KEY,
+    food_name      TEXT    NOT NULL,
+    expiration     DATE    NOT NULL,
+    used           BOOLEAN NOT NULL DEFAULT FALSE
 );
