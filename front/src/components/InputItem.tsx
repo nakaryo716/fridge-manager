@@ -45,11 +45,11 @@ export const InputItem = (props: Props) => {
     const onClickSubmit = async () => {
         const ymd = `${selectedYear}-${selectedMonth}-${selectedDate}`;
         const payload: NewFoodPayload = {
-            name: text,
-            expiration_date: ymd
+            food_name: text,
+            expiration: ymd
         };
         
-        if (!payload.name) {
+        if (!payload.food_name) {
             setSelectedYear(currentYear);
             setSelectedMonth(currentMonth + 1);
             setSelectedDate(currentDate);

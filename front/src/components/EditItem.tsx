@@ -12,7 +12,7 @@ export const EditItem = (props: Props) => {
     const { food, onUpdateHandle, setModalFlag } = props;
 
     // foodの賞味期限をセレクトバーに表示するためにnumberに変換
-    const settingYmd = food.expiration_date.split("-");
+    const settingYmd = food.expiration.split("-");
     const settingYear = parseInt(settingYmd[0]);
     const settingmonth = parseInt(settingYmd[1]);
     const settingDate = parseInt(settingYmd[2]);
@@ -46,22 +46,22 @@ export const EditItem = (props: Props) => {
     const onClickEdit = async () => {
         const ymd = `${selectedYear}-${selectedMonth}-${selectedDate}`;
         const payload: UpdateFoodPayload = {
-            name: text,
-            expiration_date: ymd,
+            food_name: text,
+            expiration: ymd,
             used: food.used,
         };
         
-        if (!payload.name) {
-            payload.name = food.name;
+        if (!payload.food_name) {
+            payload.food_name = food.food_name;
         }
 
-        await onUpdateHandle(food.id, payload);
+        await onUpdateHandle(food.food_id, payload);
         setModalFlag(false);
     };
     
     return(
             <div style={{textAlign: "center", margin: 40}}>
-                <TextField sx={{width: 400}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)} defaultValue={food.name}/>
+                <TextField sx={{width: 400}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)} defaultValue={food.food_name}/>
                 <FormControl sx={{minWidth: 120, marginLeft: 2}}>
                     <InputLabel>Year</InputLabel>
                     <Select value={selectedYear} onChange={(e) => onChengeYear(e)}>
