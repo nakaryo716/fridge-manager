@@ -13,8 +13,8 @@ export const ItemList = (props: Props) => {
 
     return (
         <div>
-            <TableContainer component={Paper} sx={{width: 1200, margin: "auto"}}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableContainer component={Paper} sx={{width: 700, margin: "auto"}}>
+                <Table sx={{ minWidth: 500}} aria-label="simple table">
                     <TableHead>
                         <TableRow>
                             <TableCell>食品</TableCell>
