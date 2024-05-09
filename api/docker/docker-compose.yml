@@ -1,6 +1,6 @@
-version: '3.8'
 services:
   database:
+    container_name: fridge-db
     build: 
       context: .
       dockerfile: Dockerfile
@@ -8,11 +8,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - "fridge-db:/var/lib/postgres/data"
+      - "fridge-db-volume:/var/lib/postgres/data"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: fridge-db
       TZ: "Asia/Tokyo"
 volumes:
-  fridge-db:
+  fridge-db-volume:

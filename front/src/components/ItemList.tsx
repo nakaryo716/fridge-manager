@@ -26,7 +26,7 @@ export const ItemList = (props: Props) => {
                     <TableBody>
                         {foods.map((food) => {
                             return(
-                                <FoodItem key={food.id} food={food} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle} />
+                                <FoodItem key={food.food_id} food={food} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle} />
                             )
                         })}
                     </TableBody>
