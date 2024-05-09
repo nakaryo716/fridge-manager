@@ -61,9 +61,9 @@ export const EditItem = (props: Props) => {
     
     return(
             <div style={{textAlign: "center", margin: 40}}>
-                <TextField sx={{width: 400}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)} defaultValue={food.food_name}/>
-                <FormControl sx={{minWidth: 120, marginLeft: 2}}>
-                    <InputLabel>Year</InputLabel>
+                <TextField sx={{width: 200}}id="filled-basic" label="商品名" variant="filled" onChange={(e:  React.ChangeEvent<HTMLInputElement>) =>followTextHandle(e)} defaultValue={food.food_name}/>
+                <FormControl sx={{minWidth: 40, marginLeft: 1}}>
+                    <InputLabel>年</InputLabel>
                     <Select value={selectedYear} onChange={(e) => onChengeYear(e)}>
                         {sequentialYear.map((year) => {
                             return(
@@ -72,8 +72,8 @@ export const EditItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <FormControl sx={{minWidth: 120, marginLeft: 1}}>
-                    <InputLabel>Month</InputLabel>
+                <FormControl sx={{minWidth: 80, marginLeft: 1}}>
+                    <InputLabel>月</InputLabel>
                     <Select value={selectedMonth} onChange={(e) => onChengeMonth(e)}>
                         {sequentialMonth.map((month) => {
                             return(
@@ -82,8 +82,8 @@ export const EditItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <FormControl sx={{minWidth: 120, marginLeft: 1}}>
-                    <InputLabel>Date</InputLabel>
+                <FormControl sx={{minWidth: 80, marginLeft: 1}}>
+                    <InputLabel>日</InputLabel>
                     <Select value={selectedDate} onChange={(e) => onChengeDate(e)}>
                         {sequentialDate.map((date) => {
                             return(
@@ -92,7 +92,7 @@ export const EditItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <Button size="large" variant="contained" sx={{height: 56, width: 180, marginLeft: 4}} onClick={() => onClickEdit()}>変更</Button>
+                <Button size="large" variant="contained" sx={{height: 56, width: 100, marginLeft: 1}} onClick={() => onClickEdit()}>変更</Button>
             </div>
     );
 };
