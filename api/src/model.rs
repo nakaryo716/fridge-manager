@@ -1,4 +1,5 @@
-use crate::error_type::RepositoryError;
+use std::{error::Error, fmt::Debug};
+
 use axum::async_trait;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Row};
@@ -11,18 +12,18 @@ pub mod repository;
 // 戻り値は任意の種類(Pg, MySql, SqLite)から得たデータが
 // Json化することができることをトレイト境界として指定している
 #[async_trait]
-pub trait CrudForDb<'a, S, T, U>:
-    Clone + std::marker::Send + std::marker::Sync + 'static
+pub trait CrudForDb<'a, S, T, U>: Clone + std::marker::Send + std::marker::Sync + 'static
 where
     S: Row,
     T: Deserialize<'a> + Validate + Clone,
     U: Deserialize<'a> + Validate + Clone,
 {
     type Response: Serialize + Deserialize<'a> + FromRow<'a, S>;
+    type Error: Debug + Error;
 
-    async fn create(&self, payload: T) -> Result<Self::Response, RepositoryError>;
-    async fn read(&self, id: i32) -> Result<Self::Response, RepositoryError>;
-    async fn read_all(&self) -> Result<Vec<Self::Response>, RepositoryError>;
-    async fn update(&self, id: i32, payload: U) -> Result<Self::Response, RepositoryError>;
-    async fn delete(&self, id: i32) -> Result<(), RepositoryError>;
+    async fn create(&self, payload: T) -> Result<Self::Response, Self::Error>;
+    async fn read(&self, id: i32) -> Result<Self::Response, Self::Error>;
+    async fn read_all(&self) -> Result<Vec<Self::Response>, Self::Error>;
+    async fn update(&self, id: i32, payload: U) -> Result<Self::Response, Self::Error>;
+    async fn delete(&self, id: i32) -> Result<(), Self::Error>;
 }
