@@ -11,17 +11,18 @@ pub mod repository;
 // 戻り値は任意の種類(Pg, MySql, SqLite)から得たデータが
 // Json化することができることをトレイト境界として指定している
 #[async_trait]
-pub trait CrudForDb<'a, R, S, T, U>:
+pub trait CrudForDb<'a, S, T, U>:
     Clone + std::marker::Send + std::marker::Sync + 'static
 where
-    R: Serialize + Deserialize<'a> + FromRow<'a, S>,
     S: Row,
     T: Deserialize<'a> + Validate + Clone,
     U: Deserialize<'a> + Validate + Clone,
 {
-    async fn create(&self, payload: T) -> Result<R, RepositoryError>;
-    async fn read(&self, id: i32) -> Result<R, RepositoryError>;
-    async fn read_all(&self) -> Result<Vec<R>, RepositoryError>;
-    async fn update(&self, id: i32, payload: U) -> Result<R, RepositoryError>;
+    type Response: Serialize + Deserialize<'a> + FromRow<'a, S>;
+
+    async fn create(&self, payload: T) -> Result<Self::Response, RepositoryError>;
+    async fn read(&self, id: i32) -> Result<Self::Response, RepositoryError>;
+    async fn read_all(&self) -> Result<Vec<Self::Response>, RepositoryError>;
+    async fn update(&self, id: i32, payload: U) -> Result<Self::Response, RepositoryError>;
     async fn delete(&self, id: i32) -> Result<(), RepositoryError>;
 }

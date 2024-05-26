@@ -50,7 +50,9 @@ impl FoodsRepository {
 // Postgresからの操作によるJsonシリアライズ/デシリアライズ可能
 // Food構造体を戻り値として実装
 #[async_trait]
-impl CrudForDb<'_, Food, PgRow, CreateFood, UpdateFood> for FoodsRepository {
+impl CrudForDb<'_, PgRow, CreateFood, UpdateFood> for FoodsRepository {
+    type Response = Food;
+    
     async fn create(&self, payload: CreateFood) -> Result<Food, RepositoryError> {
         let item = sqlx::query_as::<_, Food>(
             r#"
