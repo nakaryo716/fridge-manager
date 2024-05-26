@@ -52,8 +52,9 @@ impl FoodsRepository {
 #[async_trait]
 impl CrudForDb<'_, PgRow, CreateFood, UpdateFood> for FoodsRepository {
     type Response = Food;
-    
-    async fn create(&self, payload: CreateFood) -> Result<Food, RepositoryError> {
+    type Error = RepositoryError;
+
+    async fn create(&self, payload: CreateFood) -> Result<Self::Response, Self::Error> {
         let item = sqlx::query_as::<_, Food>(
             r#"
 INSERT INTO item (food_name, expiration)
@@ -70,7 +71,7 @@ RETURNING *
         Ok(item)
     }
 
-    async fn read(&self, id: i32) -> Result<Food, RepositoryError> {
+    async fn read(&self, id: i32) -> Result<Self::Response, Self::Error> {
         let item = sqlx::query_as::<_, Food>(
             r#"
 SELECT * FROM item
@@ -88,7 +89,7 @@ WHERE food_id = $1
         Ok(item)
     }
 
-    async fn read_all(&self) -> Result<Vec<Food>, RepositoryError> {
+    async fn read_all(&self) -> Result<Vec<Self::Response>, Self::Error> {
         let item = sqlx::query_as::<_, Food>(
             r#"
 SELECT * FROM item
@@ -102,7 +103,7 @@ ORDER BY expiration
         Ok(item)
     }
 
-    async fn update(&self, id: i32, payload: UpdateFood) -> Result<Food, RepositoryError> {
+    async fn update(&self, id: i32, payload: UpdateFood) -> Result<Self::Response, Self::Error> {
         let old_item = self.read(id).await?;
 
         let insert_food = match payload.food_name {
@@ -141,7 +142,7 @@ RETURNING *
         Ok(item)
     }
 
-    async fn delete(&self, id: i32) -> Result<(), RepositoryError> {
+    async fn delete(&self, id: i32) -> Result<(), Self::Error> {
         sqlx::query(
             r#"
 DELETE FROM item
