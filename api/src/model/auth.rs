@@ -6,8 +6,8 @@ use thiserror::Error;
 // データベースに保存する型
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct User {
-    id: i32,
-    user_name: String,
+    pub id: i32,
+    pub user_name: String,
     mail: String,
     password: String,
 }
