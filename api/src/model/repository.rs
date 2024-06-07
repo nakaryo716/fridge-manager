@@ -1,5 +1,5 @@
-use crate::error_type::RepositoryError;
-use axum::async_trait;
+use crate::{error_type::RepositoryError, AppState};
+use axum::{async_trait, extract::FromRef};
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgRow, types::chrono, FromRow, PgPool};
 use std::fmt::Debug;
@@ -158,5 +158,11 @@ WHERE food_id = $1
         })?;
 
         Ok(())
+    }
+}
+
+impl FromRef<AppState> for FoodsRepository {
+    fn from_ref(input: &AppState) -> Self {
+        input.foods_repo.clone()
     }
 }

@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Row};
 use validator::Validate;
 
-pub mod auth;
 pub mod repository;
 
 // DBに対して一般的なCRUD操作を実装させるトレイト
