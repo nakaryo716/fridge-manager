@@ -1,13 +1,12 @@
-use crate::{
-    handlers::repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
-    model::repository::FoodsRepository,
-};
+use crate::{handlers::repository_handles::{
+    delete_food, get_all_foods, get_food, post_food, update_food,
+}, AppState};
 use axum::{
     http::{header::CONTENT_TYPE, Method},
     routing::{get, post},
     Router,
 };
-use std::sync::Arc;
+
 use tower_http::cors::{Any, CorsLayer};
 
 // ルーティングの設定
@@ -16,14 +15,14 @@ use tower_http::cors::{Any, CorsLayer};
 // すべての食品のクエリ -> method: 'GET' uri: '/fridge'
 // 任意IDの食品の編集 -> method: 'PUT' uri: '/fridge:id'
 // 任意ID食品の削除 -> method: 'DELETE' uri: '/fridge:id'
-pub fn services(foods_repository: FoodsRepository) -> Router {
+pub fn services(state: AppState) -> Router {
     Router::new()
         .route("/fridge", post(post_food).get(get_all_foods))
         .route(
             "/fridge/:id",
             get(get_food).put(update_food).delete(delete_food),
         )
-        .with_state(Arc::new(foods_repository))
+        .with_state(state)
         .layer(
             CorsLayer::new()
                 // "http://localhost:5173".parse::<HeaderValue>().unwrap()
