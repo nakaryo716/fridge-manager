@@ -1,6 +1,10 @@
-use crate::{handlers::repository_handles::{
-    delete_food, get_all_foods, get_food, post_food, update_food,
-}, AppState};
+use crate::{
+    handlers::{
+        auth_handle::{sign_in, sign_up},
+        repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
+    },
+    AppState,
+};
 use axum::{
     http::{header::CONTENT_TYPE, Method},
     routing::{get, post},
@@ -22,6 +26,8 @@ pub fn services(state: AppState) -> Router {
             "/fridge/:id",
             get(get_food).put(update_food).delete(delete_food),
         )
+        .route("/sign_up", post(sign_up))
+        .route("/sign_in", post(sign_in))
         .with_state(state)
         .layer(
             CorsLayer::new()
