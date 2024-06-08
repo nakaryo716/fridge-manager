@@ -20,7 +20,7 @@ pub enum AuthError {
 // データベースに保存する型
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct User {
-    pub id: i32,
+    pub user_id: i32,
     pub user_name: String,
     mail: String,
     password: String,
@@ -72,31 +72,45 @@ impl Auth<CreateUser, Credential, '_> for UsersRepository {
     type Error = AuthError;
 
     async fn create_user(&self, payload: CreateUser) -> Result<Self::Response, Self::Error> {
-        // 要検証⚠️
-        // このクエリは失敗する恐れあり
-        // sqlxがこのサブクエリでどのようにデータをバインドするかわからない
-        let user = query_as::<_, User>(
+        // ユーザーが既に登録されているかをメールアドレスを用いて確認する
+        let isexist = query_as::<_, User>(
             r#"
-INSERT INTO user 
-(user_name, mail, password) VALUES ($1, $2, $3) 
-IF NOT EXISTS (SELECT mail FROM user WHERE mail = $1)
-RETURNING *
-        "#,
+SELECT * FROM users
+WHERE mail = $1
+            "#,
         )
-        .bind(payload.user_name)
-        .bind(payload.mail)
-        .bind(payload.password)
-        .fetch_one(&self.pool)
+        .bind(&payload.mail)
+        .fetch_optional(&self.pool)
         .await
-        .map_err(|_e| AuthError::AlredyExists)?;
+        .map_err(|_e| AuthError::Unexpected)?;
 
-        Ok(user)
+        // ユーザがなかったら、登録処理をする
+        match isexist {
+            None => {
+                let user = query_as::<_, User>(
+                    r#"
+        INSERT INTO users
+        (user_name, mail, password) VALUES ($1, $2, $3)
+        RETURNING *
+                "#,
+                )
+                .bind(payload.user_name)
+                .bind(payload.mail.clone())
+                .bind(payload.password)
+                .fetch_one(&self.pool)
+                .await
+                .map_err(|_e| AuthError::Unexpected)?;
+
+                Ok(user)
+            }
+            Some(_user) => Err(AuthError::AlredyExists),
+        }
     }
 
     async fn verify_user(&self, credential: Credential) -> Result<Self::Response, Self::Error> {
         let stored_user = query_as::<_, User>(
             r#"
-SELECT * FROM user 
+SELECT * FROM users 
 WHERE mail = $1
         "#,
         )
