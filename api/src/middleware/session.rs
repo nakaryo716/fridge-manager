@@ -57,7 +57,7 @@ RETURNING *
         "#,
         )
         .bind(&session_id)
-        .bind(target_user.id)
+        .bind(target_user.user_id)
         .bind(target_user.user_name)
         .execute(&self.pool)
         .await
