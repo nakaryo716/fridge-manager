@@ -17,7 +17,6 @@ pub enum SessionError {
 #[derive(Debug, Clone, Serialize, FromRow)]
 pub struct SessionInfo {
     pub user_id: i32,
-    pub user_name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -57,12 +56,11 @@ impl SessionManage<'_, User, String> for SessionPool {
         sqlx::query(
             r#"
 INSERT INTO session 
-(session_id, user_id, user_name) VALUES ($1, $2, $3)
+(session_id, user_id) VALUES ($1, $2)
         "#,
         )
         .bind(&session_id)
         .bind(target_user.user_id)
-        .bind(target_user.user_name.clone())
         .execute(&self.pool)
         .await
         .map_err(|_e| SessionError::Unexpected)?;
@@ -73,7 +71,7 @@ INSERT INTO session
     async fn verify_session(&self, session_id: &String) -> Result<Self::UserInfo, Self::Error> {
         let session_info = sqlx::query_as::<_, SessionInfo>(
             r#"
-SELECT user_id, user_name FROM session 
+SELECT user_id FROM session 
 WHERE session_id = $1
         "#,
         )
