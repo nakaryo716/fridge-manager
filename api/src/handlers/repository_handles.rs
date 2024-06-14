@@ -38,10 +38,13 @@ pub async fn post_food(
     State(repository): State<FoodsRepository>,
     ValidatedJson(payload): ValidatedJson<CreateFood>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let response = repository.create(payload, user_info).await.map_err(|e| match e {
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-        _ => StatusCode::SERVICE_UNAVAILABLE,
-    })?;
+    let response = repository
+        .create(payload, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::SERVICE_UNAVAILABLE,
+        })?;
 
     Ok((StatusCode::CREATED, Json(response)))
 }
@@ -77,10 +80,13 @@ pub async fn update_food(
     Path(id): Path<i32>,
     Json(payload): Json<UpdateFood>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let item = repository.update(id, payload, user_info).await.map_err(|e| match e {
-        RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    let item = repository
+        .update(id, payload, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
 
     Ok((StatusCode::OK, Json(item)))
 }
@@ -90,10 +96,13 @@ pub async fn delete_food(
     State(repository): State<FoodsRepository>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    repository.delete(id, user_info).await.map_err(|e| match e {
-        RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    repository
+        .delete(id, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
 
     Ok(StatusCode::NO_CONTENT)
 }

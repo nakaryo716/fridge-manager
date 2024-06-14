@@ -49,7 +49,8 @@ impl FoodsRepository {
 // 戻り値は任意の種類(Pg, MySql, SqLite)から得たデータが
 // Json化することができることをトレイト境界として指定している
 #[async_trait]
-pub trait CrudForDb<'a, R, N, U, I>: Clone + std::marker::Send + std::marker::Sync + 'static
+pub trait CrudForDb<'a, R, N, U, I>:
+    Clone + std::marker::Send + std::marker::Sync + 'static
 where
     R: Row,
     N: Deserialize<'a> + Validate + Clone,
@@ -62,7 +63,12 @@ where
     async fn create(&self, payload: N, user_info: I) -> Result<Self::Response, Self::Error>;
     async fn read(&self, id: i32, user_info: I) -> Result<Self::Response, Self::Error>;
     async fn read_all(&self, user_info: I) -> Result<Vec<Self::Response>, Self::Error>;
-    async fn update(&self, id: i32, payload: U, user_info: I) -> Result<Self::Response, Self::Error>;
+    async fn update(
+        &self,
+        id: i32,
+        payload: U,
+        user_info: I,
+    ) -> Result<Self::Response, Self::Error>;
     async fn delete(&self, id: i32, user_info: I) -> Result<(), Self::Error>;
 }
 
@@ -74,7 +80,11 @@ impl CrudForDb<'_, PgRow, CreateFood, UpdateFood, SessionInfo> for FoodsReposito
     type Response = Food;
     type Error = RepositoryError;
 
-    async fn create(&self, payload: CreateFood, user_info: SessionInfo) -> Result<Self::Response, Self::Error> {
+    async fn create(
+        &self,
+        payload: CreateFood,
+        user_info: SessionInfo,
+    ) -> Result<Self::Response, Self::Error> {
         let item = sqlx::query_as::<_, Food>(
             r#"
 INSERT INTO item (food_name, expiration, user_id)
@@ -127,7 +137,12 @@ ORDER BY expiration
         Ok(item)
     }
 
-    async fn update(&self, id: i32, payload: UpdateFood, user_info: SessionInfo) -> Result<Self::Response, Self::Error> {
+    async fn update(
+        &self,
+        id: i32,
+        payload: UpdateFood,
+        user_info: SessionInfo,
+    ) -> Result<Self::Response, Self::Error> {
         let old_item = self.read(id, user_info.clone()).await?;
 
         let insert_food = match payload.food_name {
