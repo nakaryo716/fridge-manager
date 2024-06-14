@@ -1,14 +1,18 @@
 use crate::{
-    handlers::repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
-    model::repository::FoodsRepository,
+    handlers::{
+        auth_handle::{sign_in, sign_up},
+        repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
+        session_handle::is_session,
+    },
+    AppState,
 };
 use axum::{
-    http::{header::CONTENT_TYPE, Method},
+    http::{header::CONTENT_TYPE, HeaderValue, Method},
     routing::{get, post},
     Router,
 };
-use std::sync::Arc;
-use tower_http::cors::{Any, CorsLayer};
+
+use tower_http::cors::CorsLayer;
 
 // ルーティングの設定
 // 食品の追加 -> method: 'POST' uri: '/fridge'
@@ -16,19 +20,22 @@ use tower_http::cors::{Any, CorsLayer};
 // すべての食品のクエリ -> method: 'GET' uri: '/fridge'
 // 任意IDの食品の編集 -> method: 'PUT' uri: '/fridge:id'
 // 任意ID食品の削除 -> method: 'DELETE' uri: '/fridge:id'
-pub fn services(foods_repository: FoodsRepository) -> Router {
+pub fn services(state: AppState) -> Router {
     Router::new()
         .route("/fridge", post(post_food).get(get_all_foods))
         .route(
             "/fridge/:id",
             get(get_food).put(update_food).delete(delete_food),
         )
-        .with_state(Arc::new(foods_repository))
+        .route("/sign_up", post(sign_up))
+        .route("/sign_in", post(sign_in))
+        .route("/is_session", get(is_session))
+        .with_state(state)
         .layer(
             CorsLayer::new()
-                // "http://localhost:5173".parse::<HeaderValue>().unwrap()
-                .allow_origin(Any)
+                .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
                 .allow_methods(vec![Method::POST, Method::GET, Method::PUT, Method::DELETE])
-                .allow_headers(vec![CONTENT_TYPE]),
+                .allow_headers(vec![CONTENT_TYPE])
+                .allow_credentials(true),
         )
 }

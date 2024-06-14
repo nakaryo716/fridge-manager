@@ -1,4 +1,8 @@
-use api::{model::repository::FoodsRepository, routers};
+use api::{
+    middleware::{auth::UsersRepository, session::SessionPool},
+    model::repository::FoodsRepository,
+    routers,
+};
 use sqlx::postgres::PgPoolOptions;
 use std::error;
 use tracing::Level;
@@ -22,10 +26,14 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
         .await
         .expect("can't connect to database");
 
-    let foods_repository = FoodsRepository::new(pool);
+    let foods_repo = FoodsRepository::new(pool.clone());
+    let users_repo = UsersRepository::new(pool.clone());
+    let session_store = SessionPool::new(pool.clone());
+
+    let app_state = api::AppState::new(foods_repo, users_repo, session_store);
 
     // ルーティング
-    let services = routers::services(foods_repository);
+    let services = routers::services(app_state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     tracing::info!("Listening on {:?}", listener);

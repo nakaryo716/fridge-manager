@@ -1,9 +1,7 @@
 use crate::{
     error_type::{RepositoryError, ServerError},
-    model::{
-        repository::{CreateFood, FoodsRepository, UpdateFood},
-        CrudForDb,
-    },
+    middleware::session_extract::SessionData,
+    model::repository::{CreateFood, CrudForDb, FoodsRepository, UpdateFood},
 };
 use axum::{
     async_trait,
@@ -13,7 +11,6 @@ use axum::{
     Json,
 };
 use serde::de::DeserializeOwned;
-use std::sync::Arc;
 use validator::Validate;
 
 // バリエーションされたJsonをExtracterとして扱うための
@@ -37,22 +34,27 @@ where
 }
 
 pub async fn post_food(
-    State(repository): State<Arc<FoodsRepository>>,
+    SessionData(user_info): SessionData,
+    State(repository): State<FoodsRepository>,
     ValidatedJson(payload): ValidatedJson<CreateFood>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let response = repository.create(payload).await.map_err(|e| match e {
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-        _ => StatusCode::SERVICE_UNAVAILABLE,
-    })?;
+    let response = repository
+        .create(payload, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::SERVICE_UNAVAILABLE,
+        })?;
 
     Ok((StatusCode::CREATED, Json(response)))
 }
 
 pub async fn get_food(
-    State(repository): State<Arc<FoodsRepository>>,
+    SessionData(user_info): SessionData,
+    State(repository): State<FoodsRepository>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let item = repository.read(id).await.map_err(|e| match e {
+    let item = repository.read(id, user_info).await.map_err(|e| match e {
         RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
     })?;
@@ -61,9 +63,10 @@ pub async fn get_food(
 }
 
 pub async fn get_all_foods(
-    State(repository): State<Arc<FoodsRepository>>,
+    SessionData(user_info): SessionData,
+    State(repository): State<FoodsRepository>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let item = repository.read_all().await.map_err(|e| match e {
+    let item = repository.read_all(user_info).await.map_err(|e| match e {
         RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
         _ => StatusCode::SERVICE_UNAVAILABLE,
     })?;
@@ -72,26 +75,34 @@ pub async fn get_all_foods(
 }
 
 pub async fn update_food(
-    State(repository): State<Arc<FoodsRepository>>,
+    SessionData(user_info): SessionData,
+    State(repository): State<FoodsRepository>,
     Path(id): Path<i32>,
     Json(payload): Json<UpdateFood>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let item = repository.update(id, payload).await.map_err(|e| match e {
-        RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    let item = repository
+        .update(id, payload, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
 
     Ok((StatusCode::OK, Json(item)))
 }
 
 pub async fn delete_food(
-    State(repository): State<Arc<FoodsRepository>>,
+    SessionData(user_info): SessionData,
+    State(repository): State<FoodsRepository>,
     Path(id): Path<i32>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    repository.delete(id).await.map_err(|e| match e {
-        RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
-        RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    repository
+        .delete(id, user_info)
+        .await
+        .map_err(|e| match e {
+            RepositoryError::NotFoud(_) => StatusCode::NOT_FOUND,
+            RepositoryError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
+        })?;
 
     Ok(StatusCode::NO_CONTENT)
 }
