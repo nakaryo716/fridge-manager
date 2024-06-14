@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { App } from './App';
 import "./index.css";
+import { CookiesProvider } from 'react-cookie';
 
 // 18時以降は自動でダークモードになるように設定する関数
 const isDark = () => {
@@ -28,7 +29,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider theme={isDark()}>
       <CssBaseline />
-        <App />
+        <CookiesProvider>
+          <App />
+        </CookiesProvider>
     </ThemeProvider>
   </React.StrictMode>
 )
