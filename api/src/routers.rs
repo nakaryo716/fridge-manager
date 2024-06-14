@@ -7,12 +7,12 @@ use crate::{
     AppState,
 };
 use axum::{
-    http::{header::CONTENT_TYPE, Method},
+    http::{header::CONTENT_TYPE, HeaderValue, Method},
     routing::{get, post},
     Router,
 };
 
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 
 // ルーティングの設定
 // 食品の追加 -> method: 'POST' uri: '/fridge'
@@ -33,9 +33,9 @@ pub fn services(state: AppState) -> Router {
         .with_state(state)
         .layer(
             CorsLayer::new()
-                // "http://localhost:5173".parse::<HeaderValue>().unwrap()
-                .allow_origin(Any)
+                .allow_origin("http://localhost:5173".parse::<HeaderValue>().unwrap())
                 .allow_methods(vec![Method::POST, Method::GET, Method::PUT, Method::DELETE])
-                .allow_headers(vec![CONTENT_TYPE]),
+                .allow_headers(vec![CONTENT_TYPE])
+                .allow_credentials(true),
         )
 }
