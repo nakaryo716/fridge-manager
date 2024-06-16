@@ -1,4 +1,4 @@
-import { NewUser, User } from "../types/middleware";
+import { Credentials, NewUser, User } from "../types/middleware";
 
 export const signUP = async (newUser: NewUser): Promise<User> => {
     const res = await fetch("http://localhost:3000/sign_up",{
@@ -13,8 +13,8 @@ export const signUP = async (newUser: NewUser): Promise<User> => {
     return responseJson;
 }
 
-export const signIn = async (credential: Credential): Promise<User> => {
-    const res = await fetch("http://localhost:3000/sign_up",{
+export const signIn = async (credential: Credentials): Promise<User> => {
+    const res = await fetch("http://localhost:3000/sign_in",{
         method: "POST",
         headers: {
             "Content-Type": "application/json",
