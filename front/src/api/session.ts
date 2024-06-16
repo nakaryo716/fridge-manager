@@ -6,6 +6,9 @@ export const isSession = async (): Promise<SessionInfo> => {
         credentials: "include",
     });
 
+    if (!res) {
+        throw new Error("have not session");
+    }
     const responseJson: SessionInfo = await res.json();
     return responseJson;
 }
