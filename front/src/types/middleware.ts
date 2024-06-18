@@ -4,7 +4,7 @@ export type NewUser = {
     password: string
 }
 
-export type Credential= {
+export type Credentials = {
     mail: string,
     password: string,
 }

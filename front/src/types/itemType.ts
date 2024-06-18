@@ -5,6 +5,7 @@ export type TrackedFood = {
     food_name: string,
     expiration: string,
     used: boolean,
+    user_id: string,
 };
 
 export type NewFoodPayload = {

@@ -50,7 +50,7 @@ where
                         })?;
                 Ok(SessionData(user))
             }
-            None => Err(StatusCode::NON_AUTHORITATIVE_INFORMATION),
+            None => Err(StatusCode::NOT_FOUND),
         }
     }
 }
