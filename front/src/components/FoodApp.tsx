@@ -37,24 +37,16 @@ export const FoodApp = () => {
     })();
   }, []);
 
-// テスト
-// 9bf7f092-535e-4fb5-9694-d88024082292 ryo
-// 2ae35ec2-a3d6-445d-9287-3dcd95a3bcef akemi
+
   const [cookie, setCookie, removeCookie] = useCookies(["session_id"]);
-
-  const onClickSession = () => {
-    console.log(cookie);
-    setCookie("session_id", "9bf7f092-535e-4fb5-9694-d88024082292");
-  }
-
+  
   const onClickRmSession = () => {
     removeCookie("session_id");
   }
 
   return(
     <>
-      <button onClick={onClickSession}>session</button>
-      <button onClick={onClickRmSession}>remove session</button>
+      <button onClick={onClickRmSession}>ログアウト</button>
       <h1 style={{textAlign: "center"}}>賞味・消費期限マネージャー</h1>
       <InputItem onSubmitHandle={onSubmitHandle} />
       <ItemList foods={foods} onUpdateHandle={onUpdateHandle} onDeleteHandle={onDeleteHandle}></ItemList>
