@@ -2,6 +2,7 @@ import { Container, Card, TextField, Button, Typography } from '@mui/material';
 import { signIn } from '../api/auth';
 import { Credentials } from '../types/middleware';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const SignIn = () => {
   const [mail, setMailText] = useState("");
@@ -15,17 +16,25 @@ export const SignIn = () => {
     setPassWord(e.target.value);
   };
 
+  const navigate = useNavigate();
+
   const onClickSignIn = async () => {
     const cred: Credentials = {
       mail: mail,
       password: password,
     };
 
-    await signIn(cred);
+    try {
+      const res = await signIn(cred);
+      
+      if (!res) {
+        alert("パスワードが違います");
+      }
+      navigate("/app");
 
-    // この後に失敗したら
-    // パスワードが違いますの表示
-    // Okだったらアプリケーションページにリダイレクトする
+    } catch {
+      alert("パスワードが違います");
+    }
   };
 
   return (
