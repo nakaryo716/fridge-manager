@@ -47,3 +47,24 @@ pub async fn sign_in(
     let cookie = jar.add(Cookie::new(SESSION_ID, session_id_value));
     Ok((StatusCode::OK, cookie, Json(res)))
 }
+
+pub async fn sign_out(
+    jar: CookieJar,
+    State(session_store): State<SessionPool>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let cookie = jar.get(SESSION_ID).map(|cookie| cookie.value().to_owned());
+
+    match cookie {
+        Some(session_id) => {
+            session_store
+                .delete_session(&session_id.to_string())
+                .await
+                .map_err(|_e| StatusCode::NOT_FOUND)?;
+        }
+        None => Err(StatusCode::NOT_FOUND)?,
+    }
+
+    let _ = jar.remove(Cookie::from(SESSION_ID));
+
+    Ok(StatusCode::NO_CONTENT)
+}
