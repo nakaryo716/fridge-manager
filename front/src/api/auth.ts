@@ -34,6 +34,6 @@ export const signOut = async () => {
             credentials: "include",
         });
     } catch {
-        console.error("couldn't sign out");
+       throw new Error("サインアウトできませんでした");
     }
 }
