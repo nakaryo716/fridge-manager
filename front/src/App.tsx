@@ -49,7 +49,8 @@ export const App = () => {
       await signOut();
       removeCookie("session_id");
       navigate("/sign_in");
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("サインアウトできませんでした");
     }
   }
