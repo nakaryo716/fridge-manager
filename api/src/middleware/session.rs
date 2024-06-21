@@ -42,6 +42,7 @@ where
 
     async fn create_session(&self, target_user: &T) -> Result<Self::SessionId, Self::Error>;
     async fn verify_session(&self, session_id: &S) -> Result<Self::UserInfo, Self::Error>;
+    async fn delete_session(&self, session_id: &S) -> Result<(), Self::Error>;
 }
 
 #[async_trait]
@@ -81,6 +82,22 @@ WHERE session_id = $1
         .map_err(|_e| SessionError::Unexpected)?;
 
         session_info.ok_or(SessionError::NotFound)
+    }
+
+    async fn delete_session(&self, session_id: &String) -> Result<(), Self::Error> {
+        println!("{}", session_id);
+        sqlx::query(
+            r#"
+DELETE FROM session
+WHERE session_id = $1
+            "#,
+        )
+        .bind(session_id)
+        .execute(&self.pool)
+        .await
+        .map_err(|_e| SessionError::NotFound)?;
+
+        Ok(())
     }
 }
 

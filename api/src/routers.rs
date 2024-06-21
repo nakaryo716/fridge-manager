@@ -1,6 +1,6 @@
 use crate::{
     handlers::{
-        auth_handle::{sign_in, sign_up},
+        auth_handle::{sign_in, sign_out, sign_up},
         repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
         session_handle::is_session,
     },
@@ -30,6 +30,7 @@ pub fn services(state: AppState) -> Router {
         .route("/sign_up", post(sign_up))
         .route("/sign_in", post(sign_in))
         .route("/is_session", get(is_session))
+        .route("/sign_out", get(sign_out))
         .with_state(state)
         .layer(
             CorsLayer::new()
