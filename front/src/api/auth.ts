@@ -27,15 +27,13 @@ export const signIn = async (credential: Credentials): Promise<User> => {
     return responseJson;
 }
 
-export const signOut = async () => {
+export const signOut = async () => {  
     try {
         await fetch("http://localhost:3000/sign_out", {
             method: "GET",
             credentials: "include",
         });
-
-        return;
     } catch {
-        console.error("Sign Out Error");
+        console.error("couldn't sign out");
     }
 }
