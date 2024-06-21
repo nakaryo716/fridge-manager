@@ -97,8 +97,19 @@ export const InputItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <Button size="large" variant="contained" sx={{height: 56, width: 100, marginLeft: 2}} onClick={() => onClickSubmit()}>追加</Button>
+                <Button size="large" variant="contained" sx={buttonStyle} onClick={() => onClickSubmit()}>追加</Button>
             </div>
         </>
     );
 };
+
+const buttonStyle = {
+    color: "black",
+    height: 56,
+    width: 100,
+    marginLeft: 2,
+    backgroundColor: "#FF9900",
+    "&:hover": {
+        backgroundColor: "#FF6600",
+    },
+}
