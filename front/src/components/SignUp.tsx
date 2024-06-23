@@ -35,7 +35,7 @@ export const SignUp = () => {
     <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
       <Card sx={{ mt: 8 }}>
         <Typography variant="h2" sx={{ mb: 2, marginTop: 3 }}>
-          新規登録
+          サインアップ
         </Typography>
         <TextField
           id="username"
@@ -63,11 +63,21 @@ export const SignUp = () => {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengePass(e)}
         />
         <div>
-            <Button variant="contained" type="submit" sx={{ mt: 3, marginBlock: 3 }} onClick={onClickSignUp}>
+            <Button variant="contained" type="submit" sx={ buttonStyle } onClick={onClickSignUp}>
             登録
             </Button>
         </div>
       </Card>
     </Container>
   );
+};
+
+const buttonStyle = {
+  mt: 3,
+  marginBlock: 3,
+  color: "black",
+  backgroundColor: "#FF9900",
+  "&:hover": {
+      backgroundColor: "#FF6600",
+  },
 };
