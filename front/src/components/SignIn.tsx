@@ -60,10 +60,20 @@ export const SignIn = () => {
           sx={{ width: 450 }}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengePass(e)}
         />
-        <Button variant="contained" type="submit" sx={{ mt: 3, marginBlock: 3 }} onClick={onClickSignIn}>
+        <Button variant="contained" type="submit" sx={ buttonStyle } onClick={onClickSignIn}>
           サインイン
         </Button>
       </Card>
     </Container>
   );
+};
+
+const buttonStyle = {
+  mt: 3,
+  marginBlock: 3,
+  color: "black",
+  backgroundColor: "#FF9900",
+  "&:hover": {
+      backgroundColor: "#FF6600",
+  },
 };

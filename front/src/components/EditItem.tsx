@@ -92,7 +92,19 @@ export const EditItem = (props: Props) => {
                         })}
                     </Select>
                 </FormControl>
-                <Button size="large" variant="contained" sx={{height: 56, width: 100, marginLeft: 1}} onClick={() => onClickEdit()}>変更</Button>
+                <Button size="large" variant="contained" sx={buttonStyle} onClick={() => onClickEdit()}>変更</Button>
             </div>
     );
 };
+
+const buttonStyle = {
+    height: 56,
+    width: 100,
+    marginLeft: 1,
+    color: "black",
+    backgroundColor: "#FF9900",
+    "&:hover": {
+        backgroundColor: "#FF6600",
+    },
+  };
+

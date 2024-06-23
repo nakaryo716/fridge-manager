@@ -33,10 +33,10 @@ export const FoodItem = (props: Props) => {
 
     return(
         <TableRow key={food.food_id}>
-        <TableCell align="left"><Checkbox onChange={() => onClickCheckBox(food)} checked={food.used}/>{food.food_name}</TableCell>
+        <TableCell align="left"><Checkbox onChange={() => onClickCheckBox(food)} checked={food.used} sx={ checkBoxStyle }/>{food.food_name}</TableCell>
         <TableCell align="left">{food.expiration}</TableCell>
         <TableCell align="left">
-            <Button key={food.food_id} variant="contained" sx={{backgroundColor: "mediumturquoise", "&:hover":{backgroundColor: "darkcyan"}}} onClick={modalOpen}>編集</Button>
+            <Button key={food.food_id} variant="contained" sx={{backgroundColor: "#007d7d", "&:hover":{backgroundColor: "#005757"}}} onClick={modalOpen}>編集</Button>
             <Modal open={modalFlag} onClose={modalClose}>
                 <Box sx={style}>
                     <EditItem food={food} onUpdateHandle={onUpdateHandle} setModalFlag={setModalFlag}></EditItem>
@@ -44,7 +44,7 @@ export const FoodItem = (props: Props) => {
             </Modal>
         </TableCell>
         <TableCell align="left">
-            <Button variant="contained" sx={{backgroundColor: "pink", "&:hover":{backgroundColor: "hotpink"}}} onClick={() => onClickDelete(food.food_id)}>削除</Button>
+            <Button variant="contained" sx={{backgroundColor: "#c22755", "&:hover":{backgroundColor: "#7f1830"}}} onClick={() => onClickDelete(food.food_id)}>削除</Button>
         </TableCell>
     </TableRow>
     )
@@ -61,3 +61,9 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
+
+const checkBoxStyle = {
+    '&.Mui-checked': {
+      color: "#1196ab"
+    },
+}
