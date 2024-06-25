@@ -1,7 +1,9 @@
 use axum::{async_trait, extract::FromRef};
+use password_auth::{generate_hash, verify_password, VerifyError};
 use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, query_as, PgPool};
 use thiserror::Error;
+use tokio::task;
 
 use crate::AppState;
 
@@ -87,6 +89,10 @@ WHERE mail = $1
         // ユーザがなかったら、登録処理をする
         match isexist {
             None => {
+                let hashed_password = task::spawn_blocking(|| generate_hash(payload.password))
+                    .await
+                    .map_err(|_e| AuthError::Unexpected)?;
+
                 let user = query_as::<_, User>(
                     r#"
         INSERT INTO users
@@ -96,7 +102,7 @@ WHERE mail = $1
                 )
                 .bind(payload.user_name)
                 .bind(payload.mail.clone())
-                .bind(payload.password)
+                .bind(hashed_password)
                 .fetch_one(&self.pool)
                 .await
                 .map_err(|_e| AuthError::Unexpected)?;
@@ -119,10 +125,19 @@ WHERE mail = $1
         .await
         .map_err(|_e| AuthError::UserNotFound)?;
 
-        if credential.password == stored_user.password {
-            Ok(stored_user)
-        } else {
-            Err(AuthError::Defferentpassword)
+        let cloned_user = stored_user.clone();
+        let verify_result = task::spawn_blocking(move || {
+            verify_password(&credential.password, &cloned_user.password)
+        })
+        .await
+        .map_err(|_e| AuthError::Unexpected)?;
+
+        match verify_result {
+            Ok(_) => Ok(stored_user),
+            Err(e) => match e {
+                VerifyError::Parse(_) => Err(AuthError::Unexpected),
+                VerifyError::PasswordInvalid => Err(AuthError::Defferentpassword),
+            },
         }
     }
 }
