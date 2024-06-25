@@ -85,7 +85,6 @@ WHERE session_id = $1
     }
 
     async fn delete_session(&self, session_id: &String) -> Result<(), Self::Error> {
-        println!("{}", session_id);
         sqlx::query(
             r#"
 DELETE FROM session
