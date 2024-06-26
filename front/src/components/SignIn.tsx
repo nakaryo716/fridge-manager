@@ -25,13 +25,8 @@ export const SignIn = () => {
     };
 
     try {
-      const res = await signIn(cred);
-      
-      if (!res) {
-        alert("パスワードが違います");
-      }
+      await signIn(cred);
       navigate("/app");
-
     } catch {
       alert("パスワードが違います");
     }
