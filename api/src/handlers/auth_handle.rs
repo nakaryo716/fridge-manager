@@ -12,7 +12,7 @@ pub async fn sign_up(
     State(user_repository): State<UsersRepository>,
     Json(payload): Json<CreateUser>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let res = user_repository
+    user_repository
         .create_user(payload)
         .await
         .map_err(|e| match e {
@@ -20,7 +20,7 @@ pub async fn sign_up(
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         })?;
 
-    Ok((StatusCode::OK, Json(res)))
+    Ok(StatusCode::OK)
 }
 
 pub async fn sign_in(
@@ -45,7 +45,7 @@ pub async fn sign_in(
         .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let cookie = jar.add(Cookie::new(SESSION_ID, session_id_value));
-    Ok((StatusCode::OK, cookie, Json(res)))
+    Ok((StatusCode::OK, cookie))
 }
 
 pub async fn sign_out(

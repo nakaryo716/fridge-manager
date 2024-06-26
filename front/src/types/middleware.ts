@@ -9,13 +9,6 @@ export type Credentials = {
     password: string,
 }
 
-export type User = {
-    user_id: number,
-    user_name: string,
-    mail: string,
-    password: string,
-}
-
 export type SessionInfo = {
     user_id: number,
 }
