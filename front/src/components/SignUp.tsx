@@ -27,7 +27,11 @@ export const SignUp = () => {
       password,
     };
 
-    await signUP(payload);
+    try {
+      await signUP(payload);
+    } catch {
+      alert("サインアップできませんでした");
+    }
   };
 
 
