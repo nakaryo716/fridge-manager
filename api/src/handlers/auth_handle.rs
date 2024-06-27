@@ -59,9 +59,9 @@ pub async fn sign_out(
             session_store
                 .delete_session(&session_id.to_string())
                 .await
-                .map_err(|_e| StatusCode::NOT_FOUND)?;
+                .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         }
-        None => Err(StatusCode::NOT_FOUND)?,
+        None => Err(StatusCode::UNAUTHORIZED)?,
     }
 
     let _ = jar.remove(Cookie::from(SESSION_ID));
