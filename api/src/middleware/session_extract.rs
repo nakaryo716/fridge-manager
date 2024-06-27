@@ -45,12 +45,12 @@ where
                         .verify_session(&cookie_value)
                         .await
                         .map_err(|e| match e {
-                            SessionError::NotFound => StatusCode::NOT_FOUND,
+                            SessionError::NotFound => StatusCode::UNAUTHORIZED,
                             SessionError::Unexpected => StatusCode::INTERNAL_SERVER_ERROR,
                         })?;
                 Ok(SessionData(user))
             }
-            None => Err(StatusCode::NOT_FOUND),
+            None => Err(StatusCode::UNAUTHORIZED),
         }
     }
 }
