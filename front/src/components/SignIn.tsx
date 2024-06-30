@@ -25,10 +25,24 @@ export const SignIn = () => {
     };
 
     try {
-      await signIn(cred);
+      const res = await signIn(cred);
+
+      if (!res.ok) {
+        switch (res.status) {
+          case 400:
+            alert("パスワードが違います");
+            break;
+          case 404:
+            alert("ユーザーが存在しません");
+            break;
+          default:
+            alert("予期せぬエラーが発生しました");
+            break;
+        }
+      }
       navigate("/app");
-    } catch {
-      alert("パスワードが違います");
+    } catch (err: unknown) {
+      alert("接続エラー");
     }
   };
 
