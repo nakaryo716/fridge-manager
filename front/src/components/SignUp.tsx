@@ -2,6 +2,7 @@ import { Container, Card, TextField, Button, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { NewUser } from '../types/middleware';
 import { signUP } from '../api/auth';
+import { useNavigate } from 'react-router-dom';
 
 export const SignUp = () => {
   const [userName, setUserName] = useState("");
@@ -20,6 +21,7 @@ export const SignUp = () => {
     setPassWord(e.target.value);
   };
 
+  const navigate = useNavigate();
   const onClickSignUp = async () => {
     const payload: NewUser = {
       user_name: userName,
@@ -28,9 +30,21 @@ export const SignUp = () => {
     };
 
     try {
-      await signUP(payload);
+      const res = await signUP(payload);
+      if (!res.ok) {
+        switch (res.status) {
+          case 400:
+            alert("既に存在するユーザーです");
+            break;
+          default:
+            alert("予期せぬエラーが発生しました");
+            break;
+        }
+      } else {
+        navigate("/sign_in");
+      }
     } catch {
-      alert("サインアップできませんでした");
+      alert("予期せぬエラーが発生しました");
     }
   };
 

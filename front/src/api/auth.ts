@@ -1,6 +1,6 @@
 import { Credentials, NewUser } from "../types/middleware";
 
-export const signUP = async (newUser: NewUser): Promise<void> => {
+export const signUP = async (newUser: NewUser): Promise<Response> => {
     try {
         const res = await fetch("http://localhost:3000/sign_up",{
             method: "POST",
@@ -9,15 +9,13 @@ export const signUP = async (newUser: NewUser): Promise<void> => {
             },
             body: JSON.stringify(newUser),
         });
-        if (!res.ok) {
-            throw new Error("sign up error");
-        }
+        return res;
     } catch {
-        throw new Error("singup error");
+        throw new Error("sign up error");
     }
 }
 
-export const signIn = async (credential: Credentials): Promise<void> => {
+export const signIn = async (credential: Credentials): Promise<Response> => {
     try {
         const res = await fetch("http://localhost:3000/sign_in",{
                 method: "POST",
@@ -27,20 +25,24 @@ export const signIn = async (credential: Credentials): Promise<void> => {
                 credentials: "include",
                 body: JSON.stringify(credential),
             });
-        if (!res.ok) {
-            throw new Error("sign error");
-        }
+        return res;
     } catch {
-        throw new Error("unexpected error");
+        throw new Error("error");
+        
     }
 }
 
 export const signOut = async () => {  
     try {
-        await fetch("http://localhost:3000/sign_out", {
+        const res = await fetch("http://localhost:3000/sign_out", {
             method: "GET",
             credentials: "include",
         });
+        // エラーを投げさせる
+        // catchに移動させる
+        if(!res.ok) {
+            throw new Error();
+        }
     } catch {
        throw new Error("サインアウトできませんでした");
     }
