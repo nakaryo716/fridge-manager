@@ -21,8 +21,21 @@ export const SignUp = () => {
     setPassWord(e.target.value);
   };
 
+  const validateName = () => {
+    const trimedName = userName.trim();
+    if (trimedName.length == 0 ){
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   const navigate = useNavigate();
   const onClickSignUp = async () => {
+    if (!validateName()) {
+      alert("ユーザー名を設定してください");
+      return;      
+    }
     if (password.length < 8) {
       alert("パスワードは8文字以上にしてください");
       return;
