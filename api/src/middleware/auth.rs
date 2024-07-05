@@ -32,6 +32,7 @@ pub struct User {
 // 新規ユーザ作成
 #[derive(Debug, Clone, Deserialize, Validate)]
 pub struct CreateUser {
+    #[validate(length(min = 1))]
     user_name: String,
     #[validate(email)]
     mail: String,
