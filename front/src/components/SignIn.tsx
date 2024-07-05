@@ -47,33 +47,38 @@ export const SignIn = () => {
   };
 
   return (
-    <Container maxWidth="sm"  sx={{textAlign: "center"}}>
-      <Card sx={{ mt: 8 }}>
-        <Typography variant="h2" sx={{ mb: 2, marginTop: 3 }}>
-          サインイン
-        </Typography>
-        <TextField
-          id="email"
-          label="メールアドレス" 
-          variant="outlined"
-          margin="normal"
-          sx={{ width: 450 }}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengeMail(e)}
-        />
-        <TextField
-          id="password"
-          label="パスワード"
-          type="password"
-          variant="outlined"
-          margin="normal"
-          sx={{ width: 450 }}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengePass(e)}
-        />
-        <Button variant="contained" type="submit" sx={ buttonStyle } onClick={onClickSignIn}>
-          サインイン
-        </Button>
-      </Card>
-    </Container>
+    <>
+      <Container maxWidth="sm"  sx={{textAlign: "center"}}>
+        <Card sx={{ mt: 8 }}>
+          <Typography variant="h2" sx={{ mb: 2, marginTop: 3 }}>
+            サインイン
+          </Typography>
+          <TextField
+            id="email"
+            label="メールアドレス" 
+            variant="outlined"
+            margin="normal"
+            sx={{ width: 450 }}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengeMail(e)}
+          />
+          <TextField
+            id="password"
+            label="パスワード"
+            type="password"
+            variant="outlined"
+            margin="normal"
+            sx={{ width: 450 }}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChengePass(e)}
+          />
+          <Button variant="contained" type="submit" sx={ buttonStyle } onClick={onClickSignIn}>
+            サインイン
+          </Button>
+        </Card>
+      </Container>
+      <div style={{textAlign: "center"}}>
+        <p>新規登録は<a href='/sign_up'>こちら</a></p>
+      </div>
+    </>
   );
 };
 

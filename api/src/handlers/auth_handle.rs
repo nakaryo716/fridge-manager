@@ -1,5 +1,9 @@
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    async_trait, extract::{FromRequest, Request, State}, http::StatusCode, response::IntoResponse, Json
+};
 use axum_extra::extract::{cookie::Cookie, CookieJar};
+use serde::de::DeserializeOwned;
+use validator::Validate;
 
 use crate::middleware::{
     auth::{Auth, AuthError, CreateUser, Credential, UsersRepository},
@@ -8,9 +12,30 @@ use crate::middleware::{
 
 pub const SESSION_ID: &str = "session_id";
 
+#[derive(Debug, Clone)]
+pub struct ValidatedCreateUser<T>(T);
+
+#[async_trait]
+impl<S, T> FromRequest<S> for ValidatedCreateUser<T>
+where
+    T: DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = (StatusCode, String);
+
+    async fn from_request(req: Request, state: &'_ S) -> Result<Self, Self::Rejection> {
+        let Json(body) = Json::<T>::from_request(req, &state)
+            .await
+            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+        let _ = body.validate().map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
+
+        Ok(ValidatedCreateUser(body))
+    }
+}
+
 pub async fn sign_up(
     State(user_repository): State<UsersRepository>,
-    Json(payload): Json<CreateUser>,
+    ValidatedCreateUser(payload): ValidatedCreateUser<CreateUser>,
 ) -> Result<impl IntoResponse, StatusCode> {
     user_repository
         .create_user(payload)

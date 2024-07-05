@@ -21,8 +21,26 @@ export const SignUp = () => {
     setPassWord(e.target.value);
   };
 
+  const validateName = () => {
+    const trimedName = userName.trim();
+    if (trimedName.length == 0 ){
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   const navigate = useNavigate();
   const onClickSignUp = async () => {
+    if (!validateName()) {
+      alert("ユーザー名を設定してください");
+      return;      
+    }
+    if (password.length < 8) {
+      alert("パスワードは8文字以上にしてください");
+      return;
+    }
+
     const payload: NewUser = {
       user_name: userName,
       mail,
@@ -34,7 +52,7 @@ export const SignUp = () => {
       if (!res.ok) {
         switch (res.status) {
           case 400:
-            alert("既に存在するユーザーです");
+            alert("既に存在するユーザーか無効なアドレスです");
             break;
           default:
             alert("予期せぬエラーが発生しました");

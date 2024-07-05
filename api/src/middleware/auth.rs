@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{prelude::FromRow, query_as, PgPool};
 use thiserror::Error;
 use tokio::task;
+use validator::Validate;
 
 use crate::AppState;
 
@@ -29,10 +30,13 @@ pub struct User {
 }
 
 // 新規ユーザ作成
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 pub struct CreateUser {
+    #[validate(length(min = 1))]
     user_name: String,
+    #[validate(email)]
     mail: String,
+    #[validate(length(min = 8))]
     password: String,
 }
 
