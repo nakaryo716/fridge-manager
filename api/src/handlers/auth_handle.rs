@@ -1,7 +1,14 @@
 use axum::{
-    async_trait, extract::{FromRequest, Request, State}, http::StatusCode, response::IntoResponse, Json
+    async_trait,
+    extract::{FromRequest, Request, State},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
 };
-use axum_extra::extract::{cookie::Cookie, CookieJar};
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
@@ -27,7 +34,9 @@ where
         let Json(body) = Json::<T>::from_request(req, &state)
             .await
             .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-        let _ = body.validate().map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
+        let _ = body
+            .validate()
+            .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?;
 
         Ok(ValidatedCreateUser(body))
     }
@@ -69,7 +78,14 @@ pub async fn sign_in(
         .await
         .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    let cookie = jar.add(Cookie::new(SESSION_ID, session_id_value));
+    let cookie = jar.add(
+        Cookie::build((SESSION_ID, session_id_value))
+            .http_only(true)
+            .same_site(SameSite::Strict)
+            .secure(true)
+            .build(),
+    );
+
     Ok((StatusCode::OK, cookie))
 }
 
@@ -89,7 +105,5 @@ pub async fn sign_out(
         None => Err(StatusCode::UNAUTHORIZED)?,
     }
 
-    let _ = jar.remove(Cookie::from(SESSION_ID));
-
-    Ok(StatusCode::NO_CONTENT)
+    Ok((StatusCode::NO_CONTENT, jar.remove(Cookie::from(SESSION_ID))))
 }

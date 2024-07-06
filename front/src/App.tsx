@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { NewFoodPayload, TrackedFood, UpdateFoodPayload } from "./types/itemType";
 import { deleteFoodApi, getAllFoodsApi, postFoodApi, updateFoodApi } from "./api/callApi";
@@ -41,13 +40,10 @@ export const App = () => {
   }, []);
 
 
-  const removeCookie = useCookies(["session_id"])[2];
-  const navigate = useNavigate();
-  
+  const navigate = useNavigate();  
   const onClickRmSession = async () => {
     try {
       await signOut();
-      removeCookie("session_id");
       navigate("/sign_in");
     } catch (err) {
       console.error(err);
