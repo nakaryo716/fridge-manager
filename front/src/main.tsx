@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import CssBaseline from '@mui/material/CssBaseline';
 import { App } from './App';
 import "./index.css";
-import { CookiesProvider } from 'react-cookie';
 import { RouterProvider, createBrowserRouter, redirect } from 'react-router-dom';
 import { SignIn } from './components/SignIn';
 import { SignUp } from './components/SignUp';
@@ -39,8 +38,6 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <CssBaseline />
-      <CookiesProvider>
-        <RouterProvider router={router} />
-      </CookiesProvider>
+      <RouterProvider router={router} />
   </React.StrictMode>
 )
