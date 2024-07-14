@@ -40,3 +40,123 @@ pub fn services(state: AppState) -> Router {
                 .allow_credentials(true),
         )
 }
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        middleware::{
+            auth::{CreateUser, Credential, UsersRepository},
+            session::SessionPool,
+        },
+        model::repository::FoodsRepository,
+        routers::services,
+        AppState,
+    };
+    use axum::{body::Body, http::request};
+    use http::{header::SET_COOKIE, StatusCode};
+    use sqlx::postgres::PgPoolOptions;
+    use tower::ServiceExt;
+
+    async fn database_connection() -> AppState {
+        dotenvy::dotenv().unwrap();
+        let db_url = std::env::var("DATABASE_URL").expect("can't find database");
+
+        // database 接続
+        let pool = PgPoolOptions::new()
+            .connect(&db_url)
+            .await
+            .expect("can't connect to database");
+
+        let foods_repo = FoodsRepository::new(pool.clone());
+        let users_repo = UsersRepository::new(pool.clone());
+        let session_store = SessionPool::new(pool.clone());
+        AppState::new(foods_repo, users_repo, session_store)
+    }
+
+    #[tokio::test]
+    async fn signup_test() {
+        let app_state = database_connection().await;
+        let app = services(app_state);
+
+        let body = CreateUser::new(
+            "test-user".to_string(),
+            "testmail@gmail.com".to_string(),
+            "testpassword".to_string(),
+        );
+
+        let req = request::Builder::new()
+            .uri("http://localhost:3000/sign_up")
+            .method("POST")
+            .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+            .body(serde_json::to_string(&body).unwrap())
+            .unwrap();
+
+        let res = app.oneshot(req).await.unwrap().status();
+        assert_eq!(StatusCode::OK, res);
+    }
+
+    #[tokio::test]
+    async fn signin_test() {
+        let app_state = database_connection().await;
+        let app = services(app_state);
+
+        let body = Credential::new(
+            "testmail@gmail.com".to_string(),
+            "testpassword".to_string(),
+        );
+
+        let req = request::Builder::new()
+            .uri("http://localhost:3000/sign_in")
+            .method("POST")
+            .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+            .header(http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+            .body(serde_json::to_string(&body).unwrap())
+            .unwrap();
+
+        let res = app.oneshot(req).await.unwrap();
+        assert_eq!(StatusCode::OK, res.status());
+    }
+
+
+    // 最後のアサーションで失敗する
+    // StatusCode::401になる
+    // oneshotだとうまくCookieJarをヘッダーから取得できていない
+    // そのため、内部のsession_extractorで401が返されている
+    // cookieの取得をfrom_request_partではなく、from_headerしたら解決するかもしれない
+    #[tokio::test]
+    async fn is_session_test() {
+        let app_state = database_connection().await;
+        let app = services(app_state);
+
+        let body = Credential::new(
+            "testmail@gmail.com".to_string(),
+            "testpassword".to_string(),
+        );
+
+        let req = request::Builder::new()
+            .uri("http://localhost:3000/sign_in")
+            .method("POST")
+            .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+            .header(http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+            .body(serde_json::to_string(&body).unwrap())
+            .unwrap();
+
+        let res = app.clone().oneshot(req).await.unwrap();
+        assert_eq!(StatusCode::OK, res.status());
+        
+        let cookies = res.headers().get(http::header::SET_COOKIE).unwrap().to_str().unwrap();
+        println!("Sign-in cookies: {:?}", cookies);
+    
+        let req2 = request::Builder::new()
+            .uri("http://localhost:3000/is_session")
+            .method("GET")
+            .header(SET_COOKIE, cookies)
+            .header(http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+            .body(Body::empty())
+            .unwrap();
+
+        let res = app.clone().oneshot(req2).await.unwrap();
+        println!("{:?}", res.headers());
+        assert_eq!(res.status(), StatusCode::OK);
+    }
+}
