@@ -30,7 +30,7 @@ pub struct User {
 }
 
 // 新規ユーザ作成
-#[derive(Debug, Clone, Deserialize, Validate)]
+#[derive(Debug, Clone, Deserialize, Serialize, Validate)]
 pub struct CreateUser {
     #[validate(length(min = 1))]
     user_name: String,
@@ -40,11 +40,30 @@ pub struct CreateUser {
     password: String,
 }
 
+impl CreateUser {
+    pub fn new(user_name: String, mail: String, password: String) -> Self {
+        Self {
+            user_name,
+            mail,
+            password,
+        }
+    }
+}
+
 // ログイン認証のデータ
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Credential {
     pub mail: String,
     pub password: String,
+}
+
+impl Credential {
+    pub fn new(mail: String, password: String) -> Self {
+        Self {
+            mail,
+            password,
+        }
+    }
 }
 
 // ユーザーデータを保持するデータベース
