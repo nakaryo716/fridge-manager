@@ -1,6 +1,8 @@
+use std::marker::PhantomData;
+
 use crate::{
     handlers::{
-        auth_handle::{sign_in, sign_out, sign_up},
+        auth_handle::{sign_in, sign_out, sign_up, SESSION_ID},
         repository_handles::{delete_food, get_all_foods, get_food, post_food, update_food},
         session_handle::is_session,
     },
@@ -12,6 +14,7 @@ use axum::{
     Router,
 };
 
+use axum_session_manager::SessionManagerLayer;
 use tower_http::cors::CorsLayer;
 
 // ルーティングの設定
@@ -21,6 +24,12 @@ use tower_http::cors::CorsLayer;
 // 任意IDの食品の編集 -> method: 'PUT' uri: '/fridge:id'
 // 任意ID食品の削除 -> method: 'DELETE' uri: '/fridge:id'
 pub fn services(state: AppState) -> Router {
+    let layer = SessionManagerLayer::new(
+        state.session_store.clone(),
+        SESSION_ID,
+        PhantomData::default(),
+    );
+
     Router::new()
         .route("/fridge", post(post_food).get(get_all_foods))
         .route(
@@ -31,6 +40,7 @@ pub fn services(state: AppState) -> Router {
         .route("/sign_in", post(sign_in))
         .route("/is_session", get(is_session))
         .route("/sign_out", get(sign_out))
+        .layer(layer)
         .with_state(state)
         .layer(
             CorsLayer::new()
@@ -43,35 +53,25 @@ pub fn services(state: AppState) -> Router {
 
 #[cfg(test)]
 mod test {
+    use std::usize;
+
     use crate::{
         middleware::{
             auth::{CreateUser, Credential, UsersRepository},
-            session::SessionPool,
+            session::{SessionInfo, SessionPool},
         },
         model::repository::FoodsRepository,
         routers::services,
         AppState,
     };
     use axum::{body::Body, http::request};
-    use http::{header::SET_COOKIE, StatusCode};
+    use http::StatusCode;
     use sqlx::postgres::PgPoolOptions;
     use tower::ServiceExt;
 
-    async fn database_connection() -> AppState {
-        dotenvy::dotenv().unwrap();
-        let db_url = std::env::var("DATABASE_URL").expect("can't find database");
-
-        // database 接続
-        let pool = PgPoolOptions::new()
-            .connect(&db_url)
-            .await
-            .expect("can't connect to database");
-
-        let foods_repo = FoodsRepository::new(pool.clone());
-        let users_repo = UsersRepository::new(pool.clone());
-        let session_store = SessionPool::new(pool.clone());
-        AppState::new(foods_repo, users_repo, session_store)
-    }
+    const USERNAME: &str = "test_user1";
+    const USERMAIL: &str = "testmail2@gmail.com";
+    const USERPASS: &str = "testpassword1234";
 
     #[tokio::test]
     async fn signup_test() {
@@ -79,9 +79,9 @@ mod test {
         let app = services(app_state);
 
         let body = CreateUser::new(
-            "test-user".to_string(),
-            "testmail@gmail.com".to_string(),
-            "testpassword".to_string(),
+            USERNAME.to_string(),
+            USERMAIL.to_string(),
+            USERPASS.to_string(),
         );
 
         let req = request::Builder::new()
@@ -100,10 +100,7 @@ mod test {
         let app_state = database_connection().await;
         let app = services(app_state);
 
-        let body = Credential::new(
-            "testmail@gmail.com".to_string(),
-            "testpassword".to_string(),
-        );
+        let body = Credential::new(USERMAIL.to_string(), USERPASS.to_string());
 
         let req = request::Builder::new()
             .uri("http://localhost:3000/sign_in")
@@ -117,21 +114,12 @@ mod test {
         assert_eq!(StatusCode::OK, res.status());
     }
 
-
-    // 最後のアサーションで失敗する
-    // StatusCode::401になる
-    // oneshotだとうまくCookieJarをヘッダーから取得できていない
-    // そのため、内部のsession_extractorで401が返されている
-    // cookieの取得をfrom_request_partではなく、from_headerしたら解決するかもしれない
     #[tokio::test]
     async fn is_session_test() {
         let app_state = database_connection().await;
         let app = services(app_state);
 
-        let body = Credential::new(
-            "testmail@gmail.com".to_string(),
-            "testpassword".to_string(),
-        );
+        let body = Credential::new(USERMAIL.to_string(), USERPASS.to_string());
 
         let req = request::Builder::new()
             .uri("http://localhost:3000/sign_in")
@@ -143,20 +131,48 @@ mod test {
 
         let res = app.clone().oneshot(req).await.unwrap();
         assert_eq!(StatusCode::OK, res.status());
-        
-        let cookies = res.headers().get(http::header::SET_COOKIE).unwrap().to_str().unwrap();
-        println!("Sign-in cookies: {:?}", cookies);
-    
+
+        let cookies = res
+            .headers()
+            .get(http::header::SET_COOKIE)
+            .unwrap()
+            .to_str()
+            .unwrap();
+
         let req2 = request::Builder::new()
             .uri("http://localhost:3000/is_session")
             .method("GET")
-            .header(SET_COOKIE, cookies)
+            .header(http::header::COOKIE, cookies)
             .header(http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
             .body(Body::empty())
             .unwrap();
 
         let res = app.clone().oneshot(req2).await.unwrap();
-        println!("{:?}", res.headers());
         assert_eq!(res.status(), StatusCode::OK);
+
+        let body = axum::body::to_bytes(res.into_body(), usize::MAX)
+            .await
+            .unwrap()
+            .to_vec();
+        let body = String::from_utf8(body).unwrap();
+        let json: SessionInfo = serde_json::from_str(&body).unwrap();
+        println!("{:?}", json)
+    }
+
+    // database接続ヘルパー関数
+    async fn database_connection() -> AppState {
+        dotenvy::dotenv().unwrap();
+        let db_url = std::env::var("DATABASE_URL").expect("can't find database");
+
+        // database 接続
+        let pool = PgPoolOptions::new()
+            .connect(&db_url)
+            .await
+            .expect("can't connect to database");
+
+        let foods_repo = FoodsRepository::new(pool.clone());
+        let users_repo = UsersRepository::new(pool.clone());
+        let session_store = SessionPool::new(pool.clone());
+        AppState::new(foods_repo, users_repo, session_store)
     }
 }
