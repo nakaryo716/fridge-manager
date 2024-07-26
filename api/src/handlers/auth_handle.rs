@@ -9,12 +9,13 @@ use axum_extra::extract::{
     cookie::{Cookie, SameSite},
     CookieJar,
 };
+use axum_session_manager::SessionManage;
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
 use crate::middleware::{
     auth::{Auth, AuthError, CreateUser, Credential, UsersRepository},
-    session::{SessionManage, SessionPool},
+    session::SessionPool,
 };
 
 pub const SESSION_ID: &str = "session_id";
@@ -74,7 +75,7 @@ pub async fn sign_in(
 
     // session_idをcookieとしてを渡す
     let session_id_value = session_store
-        .create_session(&res)
+        .add_session(res)
         .await
         .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
 

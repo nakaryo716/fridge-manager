@@ -1,11 +1,15 @@
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{http::StatusCode, response::IntoResponse, Extension, Json};
+use axum_session_manager::{UserData, UserState};
 
-use crate::middleware::session_extract::SessionData;
+use crate::middleware::session::SessionInfo;
 
 // Front側がセッションを持っているかどうかを確認するためのハンドラー
-// なければ、SessionData Extractorの方でエラーが返されている
 pub async fn is_session(
-    SessionData(user_info): SessionData,
+    Extension(user_data): Extension<UserData<SessionInfo>>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    Ok((StatusCode::OK, Json(user_info)))
+    match user_data.0 {
+        UserState::HaveSession(data) => Ok((StatusCode::OK, Json(data))),
+        UserState::NoSession => Err(StatusCode::UNAUTHORIZED),
+        UserState::NoCookie => Err(StatusCode::UNAUTHORIZED),
+    }
 }
