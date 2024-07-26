@@ -59,10 +59,7 @@ pub struct Credential {
 
 impl Credential {
     pub fn new(mail: String, password: String) -> Self {
-        Self {
-            mail,
-            password,
-        }
+        Self { mail, password }
     }
 }
 
